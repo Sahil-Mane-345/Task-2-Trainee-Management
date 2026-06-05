@@ -1,10 +1,24 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using TraineeApi.Services.Interfaces;
+using TraineeApi.Services;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.ModelMetadataDetailsProviders.Add(
+        new SystemTextJsonValidationMetadataProvider());
+});
+
+
+builder.Services.AddSingleton<ITraineeService, TraineeService>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
 
 var app = builder.Build();
 
