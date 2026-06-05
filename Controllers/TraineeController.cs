@@ -40,21 +40,27 @@ public class traineeController : ControllerBase{
         return Ok(_traineeService.GetTraineeById(id));
     }
 
-    private TraineeResponse MapTraineeToDto(Trainee trainee){
-        return new TraineeResponse{
-            FirstName = trainee.FirstName,
-            LastName = trainee.LastName,
-            Email = trainee.Email,
-            TechStack = trainee.TechStack,
-            Status = trainee.Status,
-            CreatedAt = trainee.CreatedAt,
-            UpdatedAt = trainee.UpdatedAt
-        };
-    }
+    // private TraineeResponse MapTraineeToDto(Trainee trainee){
+    //     return new TraineeResponse{
+    //         FirstName = trainee.FirstName,
+    //         LastName = trainee.LastName,
+    //         Email = trainee.Email,
+    //         TechStack = trainee.TechStack,
+    //         Status = trainee.Status,
+    //         CreatedAt = trainee.CreatedAt,
+    //         UpdatedAt = trainee.UpdatedAt
+    //     };
+    // }
 
     [HttpPut("{id}")]
     public IActionResult UpdateById(long id, UpdateTraineeRequest updateTrainee){
-        return Ok(_traineeService.UpdateTrainee(id, updateTrainee));
+        var t = _traineeService.UpdateTrainee(id, updateTrainee);
+        if (!t.Success){
+            return NotFound(t);
+        }else{
+            return Ok(t);
+        }
+        ;
     }
 
     [HttpDelete("{id}")]
