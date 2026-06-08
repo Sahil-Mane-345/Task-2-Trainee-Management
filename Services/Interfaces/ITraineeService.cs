@@ -4,11 +4,11 @@ using TraineeApi.Models;
 namespace TraineeApi.Services.Interfaces{
 
 public interface ITraineeService{
-    ApiResponse<List<Trainee>> GetAllTrainee();
-    ApiResponse<Trainee> GetTraineeById(long id);
-    ApiResponse<Trainee> CreateTrainee(CreateTraineeRequest newTrainee);
-    ApiResponse<Trainee> UpdateTrainee(long id, UpdateTraineeRequest updateTrainee);
-    bool DeleteTraineeById(long id);
+    Task<ApiResponse<List<Trainee>>> GetAllTrainee(string search);
+    Task<ApiResponse<Trainee>> GetTraineeById(long Id);
+    Task<ApiResponse<Trainee>> CreateTrainee(CreateTraineeRequest newTrainee);
+    Task<ApiResponse<Trainee>> UpdateTrainee(long Id, UpdateTraineeRequest updateTrainee);
+    Task<bool> DeleteTraineeById(long Id);
 }
 
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace TraineeApi.Models.Entity;
 
 public class Trainee{
-    public long id { get; set; }
+    public long Id { get; set; }
 
 
     public required string FirstName { get; set; }

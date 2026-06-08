@@ -17,28 +17,34 @@ public class traineeController : ControllerBase{
         _traineeService = traineeService;
     }
 
-    [HttpGet(Name = "GetTrainees")]
-    public IActionResult Get()
+    [HttpGet()]
+    public async Task<IActionResult> GetAll(string search = "")
     {
-        return Ok(_traineeService.GetAllTrainee());
+        return Ok(await _traineeService.GetAllTrainee(search));
         
     }
 
-    [HttpPost(Name = "CreateTrainee")]
-    public IActionResult Create(CreateTraineeRequest newTrainee){
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(long id)
+    {  
+        var r = await _traineeService.GetTraineeById(id);
+        if(!r.success){
+            return NotFound(r);
+        }
+        return Ok(r);
+    }
 
-        var t = _traineeService.CreateTrainee(newTrainee);
-        return Created("/api/trainees",
-            t
+    [HttpPost()]
+    public async Task<IActionResult> Create(CreateTraineeRequest newTrainee){
+        var r = await _traineeService.CreateTrainee(newTrainee);
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = r?.data?.Id},
+            r
         );
 
     }
 
-    [HttpGet("{id}", Name = "GetTrainee")]
-    public IActionResult GetById(long id)
-    {   
-        return Ok(_traineeService.GetTraineeById(id));
-    }
 
     // private TraineeResponse MapTraineeToDto(Trainee trainee){
     //     return new TraineeResponse{
@@ -53,23 +59,23 @@ public class traineeController : ControllerBase{
     // }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateById(long id, UpdateTraineeRequest updateTrainee){
-        var t = _traineeService.UpdateTrainee(id, updateTrainee);
-        if (!t.Success){
-            return NotFound(t);
+    public async Task<IActionResult> UpdateById(long id, UpdateTraineeRequest updateTrainee){
+        var r = await _traineeService.UpdateTrainee(id, updateTrainee);
+        if (!r.success){
+            return NotFound(r);
         }else{
-            return Ok(t);
+            return Ok(r);
         }
         ;
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteById(long id){
-        bool t = _traineeService.DeleteTraineeById(id);
+    public async Task<IActionResult> DeleteById(long id){
+        bool t = await _traineeService.DeleteTraineeById(id);
         if (t){
-            return StatusCode(204, "Trainee deleted successfully");
+            return NoContent();
         }else{
-            return StatusCode(404, "Trainee Not Found");
+            return NotFound(new {message = $"Trainee with Id : {id} not found "});
         }
     }
 } 
