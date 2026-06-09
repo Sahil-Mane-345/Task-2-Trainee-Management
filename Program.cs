@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
+
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Services;
 using TraineeApi.Context;
@@ -7,6 +8,7 @@ using TraineeApi.Context;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var connectionStringMySql = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
 builder.Services.AddControllers(options =>
 {
@@ -18,7 +20,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddScoped<ITraineeService, TraineeDbService>();
 
 builder.Services.AddDbContext<AppDbContext>(opt => {
-    opt.UseInMemoryDatabase("TraineeManagementDb");
+    opt.UseMySQL(connectionStringMySql);
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
