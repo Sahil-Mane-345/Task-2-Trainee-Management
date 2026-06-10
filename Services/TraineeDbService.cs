@@ -1,9 +1,10 @@
-using System;
-using TraineeApi.Models;
+using TraineeApi.Models.TraineeDTO;
 using TraineeApi.Models.Entity;
+
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Context;
 using Microsoft.EntityFrameworkCore;
+using TraineeApi.Models;
 
 namespace TraineeApi.Services;
 
@@ -17,7 +18,7 @@ public class TraineeDbService : ITraineeService {
 
     public async Task<ApiResponse<List<Trainee>>> GetAllTrainee(string search){
         ApiResponse<List<Trainee>> res = new ApiResponse<List<Trainee>>();
-        var TData = await _context.trainees.ToListAsync();
+        var TData = await _context.Trainees.ToListAsync();
 
         res.success = true;
         res.message = "Trainees fetched successfully.";
@@ -35,9 +36,9 @@ public class TraineeDbService : ITraineeService {
         return res;
     }
 
-    public async Task<ApiResponse<Trainee>> GetTraineeById(long Id){
+    public async Task<ApiResponse<Trainee>> GetTraineeById(Guid Id){
         ApiResponse<Trainee> res = new ApiResponse<Trainee>();
-        var t = await _context.trainees.FindAsync(Id);
+        var t = await _context.Trainees.FindAsync(Id);
         if ( t == null ){
             res.success = false;
             res.message = $"No Trainee Found with Id : {Id}";
@@ -54,10 +55,7 @@ public class TraineeDbService : ITraineeService {
         ApiResponse<Trainee> res = new ApiResponse<Trainee>();
         DateTime timestamp = DateTime.Now;
 
-        long unixMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
         Trainee t = new Trainee{
-            Id = unixMilliseconds,
             FirstName = newTrainee.FirstName,
             LastName = newTrainee.LastName,
             Email = newTrainee.Email,
@@ -66,7 +64,7 @@ public class TraineeDbService : ITraineeService {
             CreatedAt = timestamp
             };
 
-            await _context.trainees.AddAsync(t);
+            await _context.Trainees.AddAsync(t);
             await _context.SaveChangesAsync();
 
             res.success = true;
@@ -75,10 +73,10 @@ public class TraineeDbService : ITraineeService {
             return res;
     }
 
-    public async Task<ApiResponse<Trainee>> UpdateTrainee(long Id, UpdateTraineeRequest updateTrainee){
+    public async Task<ApiResponse<Trainee>> UpdateTrainee(Guid Id, UpdateTraineeRequest updateTrainee){
         ApiResponse<Trainee> res = new ApiResponse<Trainee>();
 
-        var t = await _context.trainees.FindAsync(Id);
+        var t = await _context.Trainees.FindAsync(Id);
         if ( t == null ){
             res.success = false;
             res.message = $"No Trainee Found with Id : {Id}";
@@ -103,12 +101,12 @@ public class TraineeDbService : ITraineeService {
         return res;
     }
 
-    public async Task<bool> DeleteTraineeById(long Id){
-        var t = await _context.trainees.FindAsync(Id);
+    public async Task<bool> DeleteTraineeById(Guid Id){
+        var t = await _context.Trainees.FindAsync(Id);
         if( t == null){
             return false;
         }
-        _context.trainees.Remove(t);
+        _context.Trainees.Remove(t);
         await _context.SaveChangesAsync();
         return true;
     }

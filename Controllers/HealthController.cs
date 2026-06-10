@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
-
 namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class HealthController : ControllerBase{
-
+public class HealthController : ControllerBase{  
     [HttpGet(Name = "GetHealth")]
     public Object Get()
     {
@@ -16,5 +14,5 @@ public class HealthController : ControllerBase{
             application = "Trainee Management API",
             timestamp = timestamp
         };
-    }
+    }  
 } 

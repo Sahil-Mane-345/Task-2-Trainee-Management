@@ -1,13 +1,10 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+
+using Org.BouncyCastle.Ocsp;
 
 namespace TraineeApi.Models.Entity;
 
 public class Trainee{
-    public long Id { get; set; }
-
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public required string FirstName { get; set; }
 
@@ -19,7 +16,7 @@ public class Trainee{
 
     public required string Status { get; set; }
 
-    public required DateTime CreatedAt { get; set; } 
+    public required DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 }

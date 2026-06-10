@@ -1,19 +1,18 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
-using TraineeApi.Models.Entity;
 using TraineeApi.Models;
 using TraineeApi.Services.Interfaces;
+using TraineeApi.Models.TraineeDTO;
 
 namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class traineeController : ControllerBase{
+public class TraineeController : ControllerBase{
 
 
     private readonly ITraineeService _traineeService;
 
-    public traineeController(ITraineeService traineeService){
+    public TraineeController(ITraineeService traineeService){
         _traineeService = traineeService;
     }
 
@@ -25,7 +24,7 @@ public class traineeController : ControllerBase{
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(long id)
+    public async Task<IActionResult> GetById(Guid id)
     {  
         var r = await _traineeService.GetTraineeById(id);
         if(!r.success){
@@ -45,21 +44,8 @@ public class traineeController : ControllerBase{
 
     }
 
-
-    // private TraineeResponse MapTraineeToDto(Trainee trainee){
-    //     return new TraineeResponse{
-    //         FirstName = trainee.FirstName,
-    //         LastName = trainee.LastName,
-    //         Email = trainee.Email,
-    //         TechStack = trainee.TechStack,
-    //         Status = trainee.Status,
-    //         CreatedAt = trainee.CreatedAt,
-    //         UpdatedAt = trainee.UpdatedAt
-    //     };
-    // }
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateById(long id, UpdateTraineeRequest updateTrainee){
+    public async Task<IActionResult> UpdateById(Guid id, UpdateTraineeRequest updateTrainee){
         var r = await _traineeService.UpdateTrainee(id, updateTrainee);
         if (!r.success){
             return NotFound(r);
@@ -70,7 +56,7 @@ public class traineeController : ControllerBase{
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteById(long id){
+    public async Task<IActionResult> DeleteById(Guid id){
         bool t = await _traineeService.DeleteTraineeById(id);
         if (t){
             return NoContent();
