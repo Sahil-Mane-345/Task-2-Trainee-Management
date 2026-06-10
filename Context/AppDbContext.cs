@@ -11,5 +11,7 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<Trainee> trainees { get; set; } = null!;
+    public DbSet<User> Users { get; set; }
+
+    public DbSet<Trainee> Trainees { get; set; }
 }
