@@ -14,6 +14,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionStringMySql = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:3000");
+        }
+    );
+});
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 builder.Services.AddControllers(options =>
 {
     options.ModelMetadataDetailsProviders.Add(
@@ -59,6 +72,8 @@ if (app.Environment.IsDevelopment())
         options.DocumentPath = "/openapi/v1.json";
     });
 }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
