@@ -14,12 +14,15 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
+
+    private readonly ILogger<UserService> _logger;
     private readonly int _expiresIn;
-    public UserService(AppDbContext context, IConfiguration configuration)
+    public UserService(AppDbContext context, IConfiguration configuration, ILogger<UserService> logger)
     {
         _context = context;
         _configuration = configuration;
         _expiresIn = Convert.ToInt32(_configuration["JWT:ExpiresIn"]);
+        _logger = logger;
     }
 
     public UserResponseDto LoginUser(UserLoginDto userLoginDto)
@@ -47,7 +50,7 @@ public class UserService : IUserService
                 Role = existing.Role
             }
         };
-
+        _logger.LogInformation($"User with Id : {existing.Id} UserName : {existing.UserName} Role : {existing.Role} logged in");
         return res;
     }
 

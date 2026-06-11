@@ -5,7 +5,7 @@ using TraineeApi.Models.TraineeDTO;
 namespace TraineeApi.Services.Interfaces{
 
 public interface ITraineeService{
-    Task<ApiResponse<List<Trainee>>> GetAllTrainee(string search);
+    Task<ApiResponse<PagedResponse<IEnumerable<Trainee>>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status);
     Task<ApiResponse<Trainee>> GetTraineeById(Guid Id);
     Task<ApiResponse<Trainee>> CreateTrainee(CreateTraineeRequest newTrainee);
     Task<ApiResponse<Trainee>> UpdateTrainee(Guid Id, UpdateTraineeRequest updateTrainee);

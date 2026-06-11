@@ -10,29 +10,44 @@ namespace TraineeApi.Services;
 
 public class TraineeDbService : ITraineeService {
 
+    private readonly ILogger<TraineeDbService> _logger;
+
     private readonly AppDbContext _context;
 
-    public TraineeDbService(AppDbContext context){
+    public TraineeDbService(AppDbContext context, ILogger<TraineeDbService> logger){
         _context = context;
+        _logger = logger;
     }
 
-    public async Task<ApiResponse<List<Trainee>>> GetAllTrainee(string search){
-        ApiResponse<List<Trainee>> res = new ApiResponse<List<Trainee>>();
+    public async Task<ApiResponse<PagedResponse<IEnumerable<Trainee>>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
+        ApiResponse<PagedResponse<IEnumerable<Trainee>>> res = new ApiResponse<PagedResponse<IEnumerable<Trainee>>>();
         var TData = await _context.Trainees.ToListAsync();
 
+        
+        // if(search != ""){
+        //     var QuertT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).ToList();
+        //     res.message = $"Trainee fetched for search : {search}";
+        //     res.data = QuertT;
+        // }
+        
+        IEnumerable<Trainee> QuerT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status));
+
+        int TotalCount = QuerT.Count();
+
+        var Skip = (pageNumber - 1) * pageSize;
+        IEnumerable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize).OrderBy( t => t.CreatedAt);
+        
         res.success = true;
         res.message = "Trainees fetched successfully.";
         
-        res.data = TData;
-        
-        if(search != ""){
-            var QuertT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).ToList();
-            res.message = $"Trainee fetched for search : {search}";
-            res.data = QuertT;
-        }
-        
-
-
+        PagedResponse<IEnumerable<Trainee>> pageRes = new PagedResponse<IEnumerable<Trainee>>
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalRecords = TotalCount,
+            Data = PageR
+        };
+        res.data = pageRes;
         return res;
     }
 
@@ -42,7 +57,7 @@ public class TraineeDbService : ITraineeService {
         if ( t == null ){
             res.success = false;
             res.message = $"No Trainee Found with Id : {Id}";
-
+            _logger.LogError($"No Trainee found with Id : {Id}");
             return res;
         }
         res.success = true;
@@ -67,6 +82,8 @@ public class TraineeDbService : ITraineeService {
             await _context.Trainees.AddAsync(t);
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation($"Trainee created with Id : {t.Id}");
+
             res.success = true;
             res.message = "Trainee created successfully.";
             res.data = t;
@@ -80,7 +97,7 @@ public class TraineeDbService : ITraineeService {
         if ( t == null ){
             res.success = false;
             res.message = $"No Trainee Found with Id : {Id}";
-
+            _logger.LogError($"No Trainee found with Id : {Id}");
             return res;
         }
 
@@ -93,7 +110,7 @@ public class TraineeDbService : ITraineeService {
         t.UpdatedAt = timestamp;
 
         await _context.SaveChangesAsync();
-
+        _logger.LogInformation($"Trainee data updated successfully for Id : {Id}");
         res.success = true;
         res.message = "Trainee Updated Successfully.";
         res.data = t;
@@ -104,10 +121,12 @@ public class TraineeDbService : ITraineeService {
     public async Task<bool> DeleteTraineeById(Guid Id){
         var t = await _context.Trainees.FindAsync(Id);
         if( t == null){
+            _logger.LogError($"No Trainee found with Id : {Id}");
             return false;
         }
         _context.Trainees.Remove(t);
         await _context.SaveChangesAsync();
+        _logger.LogInformation($"Trainee deletd succesfully with Id : {Id}");
         return true;
     }
 }

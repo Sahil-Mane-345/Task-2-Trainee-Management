@@ -16,6 +16,7 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()
     {
+        _logger.LogError("Error happended in forecast");
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
             Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -23,6 +24,7 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
             Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         })
         .ToArray();
+        
     }
 
 }

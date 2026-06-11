@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TraineeApi.Models;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Models.TraineeDTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TraineeApi.Controllers;
 
@@ -16,13 +17,16 @@ public class TraineeController : ControllerBase{
         _traineeService = traineeService;
     }
 
+    [Authorize]
     [HttpGet()]
-    public async Task<IActionResult> GetAll(string search = "")
-    {
-        return Ok(await _traineeService.GetAllTrainee(search));
+    public async Task<IActionResult> GetAll(string search = "", int pageNumber = 1, int pageSize = 10, string status = "")
+    {   
+
+        return Ok(await _traineeService.GetAllTrainee(search, pageNumber, pageSize, status));
         
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {  
@@ -33,6 +37,7 @@ public class TraineeController : ControllerBase{
         return Ok(r);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost()]
     public async Task<IActionResult> Create(CreateTraineeRequest newTrainee){
         var r = await _traineeService.CreateTrainee(newTrainee);
@@ -44,6 +49,7 @@ public class TraineeController : ControllerBase{
 
     }
 
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateById(Guid id, UpdateTraineeRequest updateTrainee){
         var r = await _traineeService.UpdateTrainee(id, updateTrainee);
@@ -55,6 +61,7 @@ public class TraineeController : ControllerBase{
         ;
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteById(Guid id){
         bool t = await _traineeService.DeleteTraineeById(id);
