@@ -30,12 +30,12 @@ public class TraineeDbService : ITraineeService {
         //     res.data = QuertT;
         // }
         
-        IEnumerable<Trainee> QuerT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status));
+        IEnumerable<Trainee> QuerT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status)).OrderBy( t => t.CreatedAt);
 
         int TotalCount = QuerT.Count();
 
         var Skip = (pageNumber - 1) * pageSize;
-        IEnumerable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize).OrderBy( t => t.CreatedAt);
+        IEnumerable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize);
         
         res.success = true;
         res.message = "Trainees fetched successfully.";

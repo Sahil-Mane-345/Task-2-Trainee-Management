@@ -1,8 +1,7 @@
-
-
 namespace TraineeApi.Models.Entity;
 
-public class Trainee{
+public class Mentor
+{
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public required string FirstName { get; set; }
@@ -11,11 +10,11 @@ public class Trainee{
 
     public required string Email { get; set; }
 
-    public required string TechStack { get; set; }
+    public required string Expertise { get; set; }
 
     public required string Status { get; set; }
 
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedDate { get; set; }
 }

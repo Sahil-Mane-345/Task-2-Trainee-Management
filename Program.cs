@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("https://localhost:3000");
+            policy.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
         }
     );
 });
@@ -36,9 +36,12 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddScoped<ITraineeService, TraineeDbService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMentorService, MentorService>();
+builder.Services.AddScoped<ILearningTaskService, LearningTaskService>();
 
 builder.Services.AddDbContext<AppDbContext>(opt => {
-    opt.UseMySQL(connectionStringMySql);
+    var serverversion = ServerVersion.AutoDetect(connectionStringMySql);
+    opt.UseMySql(connectionStringMySql, serverversion);
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -54,7 +57,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
     };
 });
-
 
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -73,9 +75,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors();
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -58,7 +58,6 @@ public class TraineeController : ControllerBase{
         }else{
             return Ok(r);
         }
-        ;
     }
 
     [Authorize]
