@@ -10,11 +10,27 @@ ASP.NET, OpenAPI / Swagger, EF Core
 
 ## How to Run
 
-Go to the project directory. First install all required packages.
+Go to the appsettings.json, insert this values for MySQL connection and JWT token information.
+```bash
+  "ConnectionStrings": {
+    "DefaultConnection" : "Server=localhost;Port=3306;Database=<databasename>;User ID=<username>;Password=<password>;SslMode=Required;"
+  },
+  "JWT":{
+    "Key":"128-bit random secret key",
+    "Issuer":"<Issuer name or domain>",
+    "Audience":"<Frontend name or domain>",
+    "ExpiresIn": Expiry time in milliseconds
+  }
+```
+First install all required packages.
 ```bash
   dotnet restore
 ```
-To launch the project in development.
+Then run this command to create all tables and relation in database.
+```bash
+  dotnet ef database update
+```
+To launch the project in development with this profile.
 ```bash
  dotnet run --launch-profile https    
 ```
@@ -22,8 +38,20 @@ To launch in watch mode.
 ```bash
   dotnet watch --launch-profile https    
 ```
+## Login CRedentials
 
+WHen you launch project, it will first seed a admin user in databse. Go to this path with this request body to get your JWT token for further operations.
 
+```bash
+  POST/ /api/auth/login   
+```
+Request Body:
+```bash
+  {
+    "username" : "admin",
+    "password" : "Admin@123456"  
+  }    
+```
 
 
 ## API Reference
