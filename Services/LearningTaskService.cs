@@ -57,11 +57,11 @@ public class LearningTaskService : ILearningTaskService
 
         LearningTask LearningTask = new()
         {
-            Title = learningTaskCreateDto.Title,
-            Description = learningTaskCreateDto.Description,
-            ExpectedTechStack = learningTaskCreateDto.ExpectedTechStack,
+            Title = learningTaskCreateDto.Title!,
+            Description = learningTaskCreateDto.Description!,
+            ExpectedTechStack = learningTaskCreateDto.ExpectedTechStack!,
             DueDate = learningTaskCreateDto.DueDate,
-            Status = learningTaskCreateDto.Status
+            Status = learningTaskCreateDto.Status!
         };
 
         await _context.LearningTasks.AddAsync(LearningTask);

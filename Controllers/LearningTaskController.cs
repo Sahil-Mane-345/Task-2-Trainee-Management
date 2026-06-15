@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeApi.Models.LearningTaskDTO;
 using TraineeApi.Services.Interfaces;
@@ -6,6 +7,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class LearningTaskController : ControllerBase
 {
     private readonly ILearningTaskService _learningTaskService;
@@ -24,7 +26,6 @@ public class LearningTaskController : ControllerBase
     [HttpGet("{Id}")]
     public async Task<IActionResult> GetById(Guid Id)
     {
-        Console.WriteLine("We arew 27");
         var r = await _learningTaskService.GetLearningTaskById(Id);
         if (!r.success)
         {

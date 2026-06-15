@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TraineeApi.Context;
 
@@ -11,9 +12,11 @@ using TraineeApi.Context;
 namespace TraineeApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615071353_TaskAssignment")]
+    partial class TaskAssignment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,50 +98,6 @@ namespace TraineeApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Mentors");
-                });
-
-            modelBuilder.Entity("TraineeApi.Models.Entity.Review", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .UseCollation("utf8mb4_0900_ai_ci");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Feedback")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<Guid>("MentorId")
-                        .HasColumnType("char(36)")
-                        .UseCollation("utf8mb4_0900_ai_ci");
-
-                    b.Property<string>("ReviewStatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateOnly>("ReviewdDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("SubmissionId")
-                        .HasColumnType("char(36)")
-                        .UseCollation("utf8mb4_0900_ai_ci");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MentorId");
-
-                    b.HasIndex("SubmissionId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("TraineeApi.Models.Entity.Submission", b =>
@@ -227,7 +186,7 @@ namespace TraineeApi.Migrations
 
                     b.HasIndex("TraineeId");
 
-                    b.ToTable("TaskAssignments");
+                    b.ToTable("TaskAssignment");
                 });
 
             modelBuilder.Entity("TraineeApi.Models.Entity.Trainee", b =>
@@ -303,25 +262,6 @@ namespace TraineeApi.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("TraineeApi.Models.Entity.Review", b =>
-                {
-                    b.HasOne("TraineeApi.Models.Entity.Mentor", "Mentor")
-                        .WithMany()
-                        .HasForeignKey("MentorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TraineeApi.Models.Entity.Submission", "Submission")
-                        .WithMany()
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Mentor");
-
-                    b.Navigation("Submission");
                 });
 
             modelBuilder.Entity("TraineeApi.Models.Entity.Submission", b =>

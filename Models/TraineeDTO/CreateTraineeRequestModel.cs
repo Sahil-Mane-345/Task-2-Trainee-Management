@@ -14,21 +14,21 @@ public class CreateTraineeRequest{
 
     [Required(ErrorMessage = "First name is required.")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "First Name must be between 3 and 50 characters.")]
-    public required string FirstName { get; set; } = string.Empty;
+    public string? FirstName { get; set; } = null!;
 
     [Required(ErrorMessage = "Last name is required.")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "Last Name must be between 3 and 50 characters.")]
-    public required string LastName { get; set; } = string.Empty;
+    public string? LastName { get; set; } = null!;
 
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Invalid Email address.")]
-    public required string Email { get; set; } = string.Empty;
+    public string? Email { get; set; } = null!;
 
     [Required(ErrorMessage = "Tech Stack is required.")]
-    public required string TechStack { get; set; } = string.Empty;
+    public  string? TechStack { get; set; } = null!;
 
     [Required(ErrorMessage = "Status is required.")]
     [EnumDataType(typeof(TraineeStatus), ErrorMessage = "Invalid Status.")]
-    public required string Status { get; set; } = string.Empty;
+    public string? Status { get; set; } = null!;
 
 }

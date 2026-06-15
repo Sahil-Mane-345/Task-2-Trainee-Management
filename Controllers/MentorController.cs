@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeApi.Models.MentorDTo;
 using TraineeApi.Services.Interfaces;
@@ -6,6 +7,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MentorController : ControllerBase
 {
     private readonly IMentorService _mentorService;

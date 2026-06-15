@@ -71,11 +71,11 @@ public class TraineeDbService : ITraineeService {
         DateTime timestamp = DateTime.Now;
 
         Trainee t = new Trainee{
-            FirstName = newTrainee.FirstName,
-            LastName = newTrainee.LastName,
-            Email = newTrainee.Email,
-            TechStack = newTrainee.TechStack,
-            Status = newTrainee.Status,
+            FirstName = newTrainee.FirstName!,
+            LastName = newTrainee.LastName!,
+            Email = newTrainee.Email!,
+            TechStack = newTrainee.TechStack!,
+            Status = newTrainee.Status!,
             CreatedAt = timestamp
             };
 

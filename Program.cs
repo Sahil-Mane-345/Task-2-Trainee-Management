@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TraineeApi.Models.Entity;
+using TraineeApi.utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,9 @@ builder.Services.AddScoped<ITraineeService, TraineeDbService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMentorService, MentorService>();
 builder.Services.AddScoped<ILearningTaskService, LearningTaskService>();
+builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddDbContext<AppDbContext>(opt => {
     var serverversion = ServerVersion.AutoDetect(connectionStringMySql);
@@ -54,16 +58,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
     };
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddProblemDetails();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
