@@ -68,6 +68,8 @@ public class SubmissionService : ISubmissionService
         await _context.Submissions.AddAsync(submission);
         await _context.SaveChangesAsync();
 
+        submission.TaskAssignment = null!;
+
         res.success = true;
         res.message = $"Submission submitted successfully";
         res.data = submission;

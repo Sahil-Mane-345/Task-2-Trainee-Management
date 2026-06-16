@@ -41,6 +41,8 @@ public class ReviewService : IReviewService
 
         Review? existingReview = await _context.Reviews.FirstOrDefaultAsync( r => r.SubmissionId == reviewCreateDto.SubmissionId);
 
+        TaskAssignment? taskAssignment = await _context.TaskAssignments.FindAsync(submission.TaskAssignmentId);
+
         if( existingReview != null)
         {
             existingReview.Feedback = reviewCreateDto.Feedback;
@@ -49,7 +51,7 @@ public class ReviewService : IReviewService
             existingReview.ReviewdDate = DateOnly.FromDateTime(DateTime.UtcNow);
             existingReview.UpdatedAt = DateTime.UtcNow;
 
-            TaskAssignment? taskAssignment = await _context.TaskAssignments.FindAsync(submission.TaskAssignmentId);
+            
 
             if(taskAssignment != null)
             {
@@ -57,7 +59,9 @@ public class ReviewService : IReviewService
                 taskAssignment.UpdatedAt = DateTime.UtcNow;
             }
 
+
             await _context.SaveChangesAsync();
+            existingReview.Submission = null!;
             res.success = true;
             res.message = "Review Submitted successfully";
             res.data = existingReview;
@@ -73,9 +77,18 @@ public class ReviewService : IReviewService
             ReviewdDate = DateOnly.FromDateTime(DateTime.UtcNow),
         };
 
+
+        if(taskAssignment != null)
+        {
+            taskAssignment.Status = reviewCreateDto.ReviewStatus == "Accepted" ? "Completed" : "Reviewed";
+            taskAssignment.UpdatedAt = DateTime.UtcNow;
+        }
+
+
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
 
+        review.Submission = null!;
         res.success = true;
         res.message = $"Review submitted successfully";
         res.data = review;
