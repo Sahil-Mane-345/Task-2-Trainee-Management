@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TraineeApi.Context;
 
@@ -11,9 +12,11 @@ using TraineeApi.Context;
 namespace TraineeApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260619063611_SubmissionFile-Entity")]
+    partial class SubmissionFileEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,25 +209,17 @@ namespace TraineeApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("SubmissionId")
-                        .HasColumnType("char(36)")
-                        .UseCollation("utf8mb4_0900_ai_ci");
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)")
-                        .UseCollation("utf8mb4_0900_ai_ci");
+                    b.Property<string>("UploadedByUser")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SubmissionId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("SubmissionFiles");
                 });
@@ -382,25 +377,6 @@ namespace TraineeApi.Migrations
                         .IsRequired();
 
                     b.Navigation("TaskAssignment");
-                });
-
-            modelBuilder.Entity("TraineeApi.Models.Entity.SubmissionFile", b =>
-                {
-                    b.HasOne("TraineeApi.Models.Entity.Submission", "Submission")
-                        .WithMany()
-                        .HasForeignKey("SubmissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TraineeApi.Models.Entity.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Submission");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TraineeApi.Models.Entity.TaskAssignment", b =>

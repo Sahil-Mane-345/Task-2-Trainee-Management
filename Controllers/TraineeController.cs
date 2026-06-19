@@ -19,10 +19,10 @@ public class TraineeController : ControllerBase{
     }
 
     [HttpGet()]
-    public async Task<IActionResult> GetAll(string search = "", int pageNumber = 1, int pageSize = 10, string status = "")
+    public IActionResult GetAll(string search = "", int pageNumber = 1, int pageSize = 10, string status = "")
     {   
 
-        return Ok(await _traineeService.GetAllTrainee(search, pageNumber, pageSize, status));
+        return Ok(_traineeService.GetAllTrainee(search, pageNumber, pageSize, status));
         
     }
 

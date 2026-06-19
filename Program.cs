@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TraineeApi.Models.Entity;
-using TraineeApi.utility;
+using TraineeApi.Utility;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +44,9 @@ builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
+
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
 builder.Services.AddDbContext<AppDbContext>(opt => {
     var serverversion = ServerVersion.AutoDetect(connectionStringMySql);
     opt.UseMySql(connectionStringMySql, serverversion);
@@ -71,6 +74,9 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 {
     opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
 });
+
+
+builder.Services.AddHttpContextAccessor();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

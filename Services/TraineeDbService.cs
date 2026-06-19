@@ -19,7 +19,7 @@ public class TraineeDbService : ITraineeService {
         _logger = logger;
     }
 
-    public async Task<ApiResponse<PagedResponse<IQueryable<Trainee>>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
+    public ApiResponse<PagedResponse<IQueryable<Trainee>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
         ApiResponse<PagedResponse<IQueryable<Trainee>>> res = new();
 
         
