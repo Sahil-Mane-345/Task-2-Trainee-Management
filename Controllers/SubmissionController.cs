@@ -9,7 +9,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]
 public class SubmissionController : ControllerBase
 {
     private readonly ISubmissionService _submissionService;

@@ -8,7 +8,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]
 public class TraineeController : ControllerBase{
 
 

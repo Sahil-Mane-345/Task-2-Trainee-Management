@@ -19,9 +19,8 @@ public class TraineeDbService : ITraineeService {
         _logger = logger;
     }
 
-    public async Task<ApiResponse<PagedResponse<IEnumerable<Trainee>>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
-        ApiResponse<PagedResponse<IEnumerable<Trainee>>> res = new ApiResponse<PagedResponse<IEnumerable<Trainee>>>();
-        var TData = await _context.Trainees.ToListAsync();
+    public async Task<ApiResponse<PagedResponse<IQueryable<Trainee>>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
+        ApiResponse<PagedResponse<IQueryable<Trainee>>> res = new();
 
         
         // if(search != ""){
@@ -30,17 +29,18 @@ public class TraineeDbService : ITraineeService {
         //     res.data = QuertT;
         // }
         
-        IEnumerable<Trainee> QuerT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status)).OrderBy( t => t.CreatedAt);
+        IQueryable<Trainee> QuerT = _context.Trainees.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status)).OrderBy( t => t.CreatedAt);
 
         int TotalCount = QuerT.Count();
-
+        pageNumber = pageNumber < 1 ? 1 : pageNumber;
+        pageSize = pageSize < 1 || pageSize > 20 ? 10 : pageSize;
         var Skip = (pageNumber - 1) * pageSize;
-        IEnumerable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize);
+        IQueryable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize);
         
         res.success = true;
         res.message = "Trainees fetched successfully.";
         
-        PagedResponse<IEnumerable<Trainee>> pageRes = new PagedResponse<IEnumerable<Trainee>>
+        PagedResponse<IQueryable<Trainee>> pageRes = new PagedResponse<IQueryable<Trainee>>
         {
             PageNumber = pageNumber,
             PageSize = pageSize,

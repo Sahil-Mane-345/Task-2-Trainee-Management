@@ -7,7 +7,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]
 public class MentorController : ControllerBase
 {
     private readonly IMentorService _mentorService;
