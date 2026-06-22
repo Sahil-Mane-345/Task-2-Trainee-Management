@@ -4,19 +4,21 @@ using TraineeApi.Models;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.SubmissionDTO;
 using TraineeApi.Services.Interfaces;
+using TraineeApi.Services.Redis;
 
 namespace TraineeApi.Services;
 
 public class SubmissionService : ISubmissionService
 {
     private readonly AppDbContext _context;
-
+    private readonly IRedisService _cache;
     private readonly ILogger<SubmissionService> _logger;
 
-    public SubmissionService(AppDbContext context, ILogger<SubmissionService> logger)
+    public SubmissionService(AppDbContext context, ILogger<SubmissionService> logger, IRedisService cache)
     {
         _context = context;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<ApiResponse<Submission>> CreateSubmission(SubmissionCreateDto submissionCreateDto)
@@ -42,7 +44,7 @@ public class SubmissionService : ISubmissionService
             existingSubmission.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-
+            await _cache.RemoveAsync($"submission:{existingSubmission.Id}");
             res.success = true;
             res.message = $"Submission with Id : {existingSubmission?.Id} resubmitted successfully";
             res.data = existingSubmission;
@@ -94,15 +96,22 @@ public class SubmissionService : ISubmissionService
     {
         ApiResponse<Submission> res = new();
         
-        Submission? submission = await _context.Submissions.FindAsync(Id);
-
-        if( submission == null)
+        Submission? submission = await _cache.GetAsync<Submission>($"submission:{Id}");
+        if(submission == null)
         {
-            res.success = false;
-            res.message = $"No Submission Found with Id : {Id}";
-            _logger.LogError($"No Submission found with Id : {Id}");
-            return res;
+            submission = await _context.Submissions.FindAsync(Id);
+
+            if( submission == null)
+            {
+                res.success = false;
+                res.message = $"No Submission Found with Id : {Id}";
+                _logger.LogError($"No Submission found with Id : {Id}");
+                return res;
+            }
+
+            await _cache.SetAsync($"submission:{Id}",submission);
         }
+        
 
         res.success = true;
         res.message = $"Submission Found with Id : {Id}";

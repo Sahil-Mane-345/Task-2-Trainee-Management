@@ -5,6 +5,7 @@ using TraineeApi.Services.Interfaces;
 using TraineeApi.Context;
 using Microsoft.EntityFrameworkCore;
 using TraineeApi.Models;
+using TraineeApi.Services.Redis;
 
 namespace TraineeApi.Services;
 
@@ -14,9 +15,12 @@ public class TraineeDbService : ITraineeService {
 
     private readonly AppDbContext _context;
 
-    public TraineeDbService(AppDbContext context, ILogger<TraineeDbService> logger){
+    private readonly IRedisService _cache;
+
+    public TraineeDbService(AppDbContext context, IRedisService cache ,ILogger<TraineeDbService> logger){
         _context = context;
         _logger = logger;
+        _cache = cache;
     }
 
     public ApiResponse<PagedResponse<IQueryable<Trainee>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
@@ -53,16 +57,32 @@ public class TraineeDbService : ITraineeService {
 
     public async Task<ApiResponse<Trainee>> GetTraineeById(Guid Id){
         ApiResponse<Trainee> res = new ApiResponse<Trainee>();
-        var t = await _context.Trainees.FindAsync(Id);
-        if ( t == null ){
-            res.success = false;
-            res.message = $"No Trainee Found with Id : {Id}";
-            _logger.LogError($"No Trainee found with Id : {Id}");
+
+        Trainee? trainee = await _cache.GetAsync<Trainee>($"trainee:{Id}");
+
+        if( trainee == null)
+        {
+            var t = await _context.Trainees.FindAsync(Id);
+            if ( t == null ){
+                res.success = false;
+                res.message = $"No Trainee Found with Id : {Id}";
+                _logger.LogError($"No Trainee found with Id : {Id}");
+                return res;
+            }
+
+            await _cache.SetAsync($"trainee:{Id}",t);
+            res.success = true;
+            res.message = $"Trainee found with Id from DB : {Id}";
+            res.data = t;
             return res;
         }
+
+
+
+        
         res.success = true;
-        res.message = $"Trainee found with Id : {Id}";
-        res.data = t;
+        res.message = $"Trainee found with Id  from cache: {Id}";
+        res.data = trainee;
         return res;
     }
 
@@ -111,6 +131,9 @@ public class TraineeDbService : ITraineeService {
 
         await _context.SaveChangesAsync();
         _logger.LogInformation($"Trainee data updated successfully for Id : {Id}");
+
+        await _cache.RemoveAsync($"trainee:{Id}");
+
         res.success = true;
         res.message = "Trainee Updated Successfully.";
         res.data = t;
@@ -126,6 +149,8 @@ public class TraineeDbService : ITraineeService {
         }
         _context.Trainees.Remove(t);
         await _context.SaveChangesAsync();
+
+        await _cache.RemoveAsync($"trainee:{Id}");
         _logger.LogInformation($"Trainee deletd succesfully with Id : {Id}");
         return true;
     }

@@ -33,7 +33,7 @@ public class LearningTaskService : ILearningTaskService
 
     public async Task<ApiResponse<LearningTask>> GetLearningTaskById(Guid Id)
     {
-        Console.WriteLine("Wea ewsdsd 36" + Id);
+
         ApiResponse<LearningTask> res = new();
 
         LearningTask? learningTask = await _context.LearningTasks.FindAsync(Id);

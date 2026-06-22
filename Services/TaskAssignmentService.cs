@@ -4,6 +4,7 @@ using TraineeApi.Models;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.TaskAssignmentDTO;
 using TraineeApi.Services.Interfaces;
+using TraineeApi.Services.Redis;
 
 namespace TraineeApi.Services;
 
@@ -14,10 +15,13 @@ public class TaskAssignmentService : ITaskAssignmentService
 
     private readonly ILogger<ITaskAssignmentService> _logger;
 
-    public TaskAssignmentService(AppDbContext context, ILogger<TaskAssignmentService> logger)
+    private readonly IRedisService _cache;
+
+    public TaskAssignmentService(AppDbContext context, IRedisService cache ,ILogger<TaskAssignmentService> logger)
     {
         _context = context;
         _logger = logger;
+        _cache = cache;
     }
     public async Task<ApiResponse<TaskAssignment>> CreateTaskAssignemnt(TaskAssignmentCreateDto taskAssignmentCreateDto)
     {
@@ -83,15 +87,22 @@ public class TaskAssignmentService : ITaskAssignmentService
     public async Task<ApiResponse<TaskAssignment>> GetTaskAssignemntById( Guid Id)
     {
         ApiResponse<TaskAssignment> res = new();
-        TaskAssignment? taskAssignment = await _context.TaskAssignments.FindAsync(Id);
-        if(taskAssignment == null)
-        {
-            res.success = false;
-            res.message = $"No Task Assignment found with Id : {Id}";
+        TaskAssignment? taskAssignment = await _cache.GetAsync<TaskAssignment>($"taskassignment:{Id}");
 
-            _logger.LogInformation($"No Task found with Id : {Id}");
-            return res;
+        if( taskAssignment == null)
+        {
+            taskAssignment = await _context.TaskAssignments.FindAsync(Id);
+            if(taskAssignment == null)
+            {
+                res.success = false;
+                res.message = $"No Task Assignment found with Id : {Id}";
+
+                _logger.LogInformation($"No Task found with Id : {Id}");
+                return res;
+            }
+            await _cache.SetAsync($"taskassignment:{Id}",taskAssignment);
         }
+        
         res.success = true;
         res.message = $"Task Assignment found with Id : {Id}";
         res.data = taskAssignment;
@@ -114,6 +125,7 @@ public class TaskAssignmentService : ITaskAssignmentService
         taskAssignment.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await _cache.RemoveAsync($"taskassignment:{Id}");
         res.success = true;
         res.message = $"Task Assignment Status Updated for Id : {Id}";
             
