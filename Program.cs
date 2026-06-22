@@ -1,79 +1,32 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Microsoft.EntityFrameworkCore;
-
-using TraineeApi.Services.Interfaces;
-using TraineeApi.Services;
-using TraineeApi.Context;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using TraineeApi.Models.Entity;
 using TraineeApi.Utility;
 using System.Text.Json.Serialization;
+using TraineeApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionStringMySql = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
-        }
-    );
-});
+builder.Services.AddCorsConfiguration();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Services.AddControllers(options =>
-{
-    options.ModelMetadataDetailsProviders.Add(
-        new SystemTextJsonValidationMetadataProvider());
-});
+builder.Services.AddApiConfiguration();
 
 
-builder.Services.AddScoped<ITraineeService, TraineeDbService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IMentorService, MentorService>();
-builder.Services.AddScoped<ILearningTaskService, LearningTaskService>();
-builder.Services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
-builder.Services.AddScoped<ISubmissionService, SubmissionService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddStaticServices();
 
+builder.Services.AddDbContext(builder.Configuration);
 
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddRedisContext(builder.Configuration);
 
-builder.Services.AddDbContext<AppDbContext>(opt => {
-    var serverversion = ServerVersion.AutoDetect(connectionStringMySql);
-    opt.UseMySql(connectionStringMySql, serverversion);
-});
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!))
-    };
-});
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddProblemDetails();
 
-builder.Services.AddControllers().AddJsonOptions(opts =>
-{
-    opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault | JsonIgnoreCondition.WhenWritingNull;
-});
 
 
 builder.Services.AddHttpContextAccessor();
@@ -113,22 +66,6 @@ app.MapGet("/", () =>
 });
 
 
-using(var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    if (!context.Users.Any())
-    {
-        context.Users.Add(new User
-        {
-            UserName = "admin",
-            Email = "admin@trainee.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123456"),
-            Role = "Admin"
-        });
-
-        context.SaveChanges();
-    }
-}
+await app.SeedDatabaseAsync();
 
 app.Run();
