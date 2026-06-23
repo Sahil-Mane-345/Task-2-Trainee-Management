@@ -21,6 +21,7 @@ public class TraineeDbService : ITraineeService {
         _context = context;
         _logger = logger;
         _cache = cache;
+        // Console.WriteLine("Trainee Service created");
     }
 
     public ApiResponse<PagedResponse<IQueryable<Trainee>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){

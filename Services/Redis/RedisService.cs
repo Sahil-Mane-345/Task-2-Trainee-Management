@@ -12,6 +12,7 @@ public class RedisService : IRedisService
     {
         _cache = cache;
         _logger = logger;
+        // Console.WriteLine("Redis Object created");
     }
 
     public async Task<T?> GetAsync<T>(string key)

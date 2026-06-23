@@ -6,7 +6,7 @@ using TraineeApi.Context;
 using TraineeApi.Models.UserDTO;
 using TraineeApi.Models.Entity;
 using TraineeApi.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using TraineeApi.Utility;
 
 namespace TraineeApi.Services;
 
@@ -32,7 +32,8 @@ public class UserService : IUserService
         {
             throw new UnauthorizedAccessException("Invalid Credentials");
         }
-        bool verifyPass = BCrypt.Net.BCrypt.Verify(userLoginDto.Password, existing.PasswordHash);
+       
+        bool verifyPass = PasswordHashing.VerifyPassword(userLoginDto.Password, existing.PasswordHash);
         if (!verifyPass)
         {
             throw new UnauthorizedAccessException("Invalid Credentials.");
