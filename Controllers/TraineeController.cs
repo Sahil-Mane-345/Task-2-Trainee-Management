@@ -16,6 +16,7 @@ public class TraineeController : ControllerBase{
 
     public TraineeController(ITraineeService traineeService){
         _traineeService = traineeService;
+        // Console.WriteLine("Trainee Controller created");
     }
 
     [HttpGet()]

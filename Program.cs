@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using TraineeApi.Utility;
 using System.Text.Json.Serialization;
 using TraineeApi.Extensions;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +15,19 @@ builder.Logging.AddConsole();
 
 builder.Services.AddApiConfiguration();
 
+var rabbitMQSection = builder.Configuration.GetSection("RabbitMQ");
 
-builder.Services.AddStaticServices();
+builder.Services.AddSingleton( sp => new ConnectionFactory()
+{
+    HostName = rabbitMQSection["HostName"]!,
+    Port = Convert.ToInt32(rabbitMQSection["Port"]),
+    UserName = rabbitMQSection["UserName"]!,
+    Password = rabbitMQSection["Password"]!,
+    VirtualHost = rabbitMQSection["VirtualHost"]!,
+});
+
+
+builder.Services.AddStaticServices(builder.Configuration);
 
 builder.Services.AddDbContext(builder.Configuration);
 

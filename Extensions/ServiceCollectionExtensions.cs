@@ -2,6 +2,8 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
 using TraineeApi.Context;
+using TraineeApi.MessageBroker;
+using TraineeApi.MessageBroker.Services;
 using TraineeApi.Services;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Services.Redis;
@@ -10,8 +12,12 @@ namespace TraineeApi.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddStaticServices(this IServiceCollection services)
+    public static IServiceCollection AddStaticServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<RabbitMQSetting>(configuration.GetSection("RabbitMQ"));
+
+        services.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+
         services.AddScoped<ITraineeService, TraineeDbService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IMentorService, MentorService>();

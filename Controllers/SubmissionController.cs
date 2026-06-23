@@ -63,7 +63,7 @@ public class SubmissionController : ControllerBase
         {
             return Problem(statusCode:413,detail:res.message);
         }
-        return Ok();
+        return Ok(res);
     }
 
     [Authorize]

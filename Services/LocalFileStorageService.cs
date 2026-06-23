@@ -2,6 +2,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using TraineeApi.Context;
+using TraineeApi.MessageBroker;
+using TraineeApi.MessageBroker.Services;
 using TraineeApi.Models;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.SubmissionDTO;
@@ -17,12 +19,14 @@ public class LocalFileStorageService : IFileStorageService
     private readonly IConfiguration _configuration;
 
     private readonly HttpContext _httpContext;
+    private readonly IRabbitMQPublisher _rabbitMQPublisher;
 
-    public LocalFileStorageService( IConfiguration configuration, AppDbContext context , IHttpContextAccessor httpContextAccessor)
+    public LocalFileStorageService( IConfiguration configuration, AppDbContext context , IHttpContextAccessor httpContextAccessor, IRabbitMQPublisher rabbitMQPublisher)
     {
         _configuration = configuration;
         _context = context;
         _httpContext = httpContextAccessor.HttpContext!;
+        _rabbitMQPublisher = rabbitMQPublisher;
     }
 
     public async Task<ApiResponse<object>> SaveAsync(Guid submissionId, IFormFileCollection FormFiles)
@@ -79,12 +83,20 @@ public class LocalFileStorageService : IFileStorageService
                 UserId = new Guid(userId!),
             };
 
+            await _context.AddAsync(submissionFile);
+            await _context.SaveChangesAsync();
             submissionFiles.Add(submissionFile);
+
+            SubmissionProcessingRequestDto submissionProcessingRequestDto = new()
+            {
+                SubmissionId = submissionId,
+                FileId = submissionFile.Id,
+            };
+
+            await _rabbitMQPublisher.PublishMessageAsync(submissionProcessingRequestDto, RabbitMQQueues.SubmissionProcessing);
 
         }
         
-        await _context.AddRangeAsync(submissionFiles);
-        await _context.SaveChangesAsync();
         res.success = true;
         res.message = "All Files uploaded successfully.";
         res.data = submissionFiles;
