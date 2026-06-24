@@ -4,6 +4,7 @@ using TraineeApi.Models;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.LearningTaskDTO;
 using TraineeApi.Services.Interfaces;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -24,9 +25,9 @@ public class LearningTaskService : ILearningTaskService
 
         List<LearningTask> learningTasks = await _context.LearningTasks.ToListAsync();
 
-        res.success = true;
-        res.message = "LearningTasks fetched successfully.";
-        res.data = learningTasks;
+        res.Success = true;
+        res.Message = "LearningTasks fetched successfully.";
+        res.Data = learningTasks;
 
         return res;
     }
@@ -40,14 +41,12 @@ public class LearningTaskService : ILearningTaskService
         Console.WriteLine("Wea ewsdsd 39"+ learningTask?.Id);
         if(learningTask == null)
         {
-            res.success = false;
-            res.message = $"No LearningTask Found with Id : {Id}";
-            _logger.LogError($"No LearningTask Found with Id : {Id}");
-            return res;
+            _logger.LogError($"No Larning Task found with Id : {Id}");
+            throw new NotFoundException($"Learning Task Not found for this Id");
         }
-        res.success = true;
-        res.message = $"LearningTask found with Id : {Id}";
-        res.data = learningTask;
+        res.Success = true;
+        res.Message = $"LearningTask found with Id : {Id}";
+        res.Data = learningTask;
         return res;
     }
 
@@ -69,9 +68,9 @@ public class LearningTaskService : ILearningTaskService
 
         _logger.LogInformation($"LearningTask created with Id : {LearningTask.Id}");
 
-        res.success = true;
-        res.message = "LearningTask created successfully.";
-        res.data = LearningTask;
+        res.Success = true;
+        res.Message = "LearningTask created successfully.";
+        res.Data = LearningTask;
         return res;
     }
 
@@ -82,13 +81,9 @@ public class LearningTaskService : ILearningTaskService
         LearningTask? learningTask = await _context.LearningTasks.FindAsync(Id);
         if( learningTask == null)
         {
-            res.success = false;
-            res.message = $"No LearningTask Found with Id : {Id}";
-            _logger.LogError($"No LearningTask found with Id : {Id}");
-            return res;
+            _logger.LogError($"No Larning Task found with Id : {Id}");
+            throw new NotFoundException($"Learning Task Not found for this Id");
         }
-
-        DateTime timestamp = DateTime.UtcNow;
 
         learningTask.Title = learningTaskUpdateDto.Title;
         learningTask.Description = learningTaskUpdateDto.Description;
@@ -96,14 +91,14 @@ public class LearningTaskService : ILearningTaskService
         learningTask.DueDate = learningTaskUpdateDto.DueDate;
         learningTask.Status = learningTaskUpdateDto.Status;
         
-        learningTask.UpdatedDate = timestamp;
+        learningTask.UpdatedDate = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
         _logger.LogInformation($"LearningTask data updated successfully for Id : {Id}");
-        res.success = true;
-        res.message = "LearningTask Updated Successfully.";
-        res.data = learningTask;
+        res.Success = true;
+        res.Message = "LearningTask Updated Successfully.";
+        res.Data = learningTask;
 
         return res;
     }
@@ -115,11 +110,11 @@ public class LearningTaskService : ILearningTaskService
         if( LearningTask == null)
         {
             _logger.LogError($"No LearningTask found with Id : {Id}");
-            return false;
+            throw new NotFoundException("No Learning Task found for this Id");
         }
         _context.LearningTasks.Remove(LearningTask);
         await _context.SaveChangesAsync();
-        _logger.LogInformation($"LearningTask deletd succesfully with Id : {Id}");
+        _logger.LogInformation($"LearningTask deleted succesfully with Id : {Id}");
         return true;
     }
 }

@@ -27,10 +27,6 @@ public class MentorController : ControllerBase
     public async Task<IActionResult> GetById(Guid Id)
     {
         var r = await _mentorService.GetMentorById(Id);
-        if (!r.success)
-        {
-            return NotFound(r);
-        }
         return Ok(r);
     }
 
@@ -40,7 +36,7 @@ public class MentorController : ControllerBase
         var r = await _mentorService.CreateMentor(mentorCreateDto);
         return CreatedAtAction(
             nameof(GetById),
-            new { Id = r?.data?.Id},
+            new { Id = r?.Data?.Id},
             r
         );
     }
@@ -50,21 +46,14 @@ public class MentorController : ControllerBase
     public async Task<IActionResult> UpdateById(Guid Id, MentorUpdateDto mentorUpdateDto)
     {
         var r = await _mentorService.UpdateMentor(Id, mentorUpdateDto);
-        if (!r.success){
-            return NotFound(r);
-        }else{
-            return Ok(r);
-        }
+        return Ok(r);
+        
     }
 
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DeleteById(Guid Id){
         bool t = await _mentorService.DeleteMentorById(Id);
-        if (t){
-            return NoContent();
-        }else{
-            return NotFound(new {message = $"Mentor with Id : {Id} not found "});
-        }
+        return NoContent();
     }
     
 }

@@ -9,6 +9,7 @@ using TraineeApi.Models.Entity;
 using TraineeApi.Models.SubmissionDTO;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Utility;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -35,21 +36,14 @@ public class LocalFileStorageService : IFileStorageService
 
         if( !submissionExists )
         {
-            throw new ArgumentException("No such submission Id exists ");
+            throw new NotFoundException("No such submission Id exists ");
         }
 
         ApiResponse<object> res = new();
 
-        var result = SubmissionFilesValidator.ValidateFiles(FormFiles);
-        if (!result.status)
-        {
-            res.success = false;
-            res.message = result.Message;
-            return res;
-        }
+        SubmissionFilesValidator.ValidateFiles(FormFiles);
 
-
-        List<SubmissionFile> submissionFiles = new List<SubmissionFile>();
+        List<SubmissionFile> submissionFiles = [];
 
         foreach(var file in FormFiles)
         {
@@ -59,12 +53,10 @@ public class LocalFileStorageService : IFileStorageService
 
             string checksum = "";
 
-            using( var sha = SHA256.Create())
             using( var stream = File.Create(FilePath))
             {
                 await file.CopyToAsync(stream);
-                var hashBytes = await sha.ComputeHashAsync(file.OpenReadStream());
-                checksum = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                
                 Console.WriteLine($"Checksum : {checksum}");
             }
 
@@ -97,9 +89,9 @@ public class LocalFileStorageService : IFileStorageService
 
         }
         
-        res.success = true;
-        res.message = "All Files uploaded successfully.";
-        res.data = submissionFiles;
+        res.Success = true;
+        res.Message = "All Files uploaded successfully.";
+        res.Data = submissionFiles;
 
         return res;
     }
@@ -130,26 +122,20 @@ public class LocalFileStorageService : IFileStorageService
 
         if( submissionFile == null)
         {
-            res.success = false;
-            res.message = "Metadata not found for this Id";
-            
-            return res;
+            throw new NotFoundException("Metadata not found for this Id");
         }
 
         string FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, submissionFile.GeneratedFileName);
         if( !File.Exists(FilePath) )
         {
-            res.success = false;
-            res.message = "File not found in that path";
-            
-            return res;
+            throw new NotFoundException("File not found in storage");
         }
 
         byte[] filesBytes = await File.ReadAllBytesAsync(FilePath);
 
-        res.success = true;
-        res.message = "File found";
-        res.data = new SubmissionFileDownloadDto{
+        res.Success = true;
+        res.Message = "File found";
+        res.Data = new SubmissionFileDownloadDto{
             FileBytes = filesBytes,
             ContentType = submissionFile.ContentType,
             DownloadString = submissionFile.GeneratedFileName
@@ -164,9 +150,9 @@ public class LocalFileStorageService : IFileStorageService
 
         if( submissionFile == null)
         {
-            return false;
+            throw new NotFoundException("Metadata not found for this Id");
         }
-
+        
         string FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, submissionFile.GeneratedFileName);
         File.Delete(FilePath);
 

@@ -4,6 +4,7 @@ using TraineeApi.Models;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.ReviewDTO;
 using TraineeApi.Services.Interfaces;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -28,7 +29,7 @@ public class ReviewService : IReviewService
         if (submission == null)
         {
             _logger.LogInformation($"No Submission found with Id : {reviewCreateDto.SubmissionId}");
-            throw new ArgumentException("Submission with such Id does not exist");
+            throw new InvalidIdentifierException("Submission with such Id does not exist");
         }
 
          bool mentor = await _context.Mentors.AnyAsync( t => t.Id == reviewCreateDto.MentorId);
@@ -36,7 +37,7 @@ public class ReviewService : IReviewService
         if (!mentor)
         {
             _logger.LogInformation($"No Mentor found with Id : {reviewCreateDto.MentorId}");
-            throw new ArgumentException("Mentor with such Id does not exist");
+            throw new InvalidIdentifierException("Mentor with such Id does not exist");
         }
 
         Review? existingReview = await _context.Reviews.FirstOrDefaultAsync( r => r.SubmissionId == reviewCreateDto.SubmissionId);
@@ -51,20 +52,20 @@ public class ReviewService : IReviewService
             existingReview.ReviewdDate = DateOnly.FromDateTime(DateTime.UtcNow);
             existingReview.UpdatedAt = DateTime.UtcNow;
 
-            
-
-            if(taskAssignment != null)
+            if(taskAssignment == null)
             {
-                taskAssignment.Status = reviewCreateDto.ReviewStatus == "Accepted" ? "Completed" : "Reviewed";
-                taskAssignment.UpdatedAt = DateTime.UtcNow;
+                _logger.LogInformation($"No Task found with Id : {submission.TaskAssignmentId}");
+                throw new NotFoundException("No Task Assigned found for this Id");
             }
 
+            taskAssignment.Status = reviewCreateDto.ReviewStatus == "Accepted" ? "Completed" : "Reviewed";
+            taskAssignment.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             existingReview.Submission = null!;
-            res.success = true;
-            res.message = "Review Submitted successfully";
-            res.data = existingReview;
+            res.Success = true;
+            res.Message = "Review Submitted successfully";
+            res.Data = existingReview;
         }
 
         Review review = new()
@@ -78,20 +79,22 @@ public class ReviewService : IReviewService
         };
 
 
-        if(taskAssignment != null)
+        if(taskAssignment == null)
         {
-            taskAssignment.Status = reviewCreateDto.ReviewStatus == "Accepted" ? "Completed" : "Reviewed";
-            taskAssignment.UpdatedAt = DateTime.UtcNow;
+            _logger.LogInformation($"No Task found with Id : {submission.TaskAssignmentId}");
+            throw new NotFoundException("No Task Assigned found for this Id");
         }
 
+        taskAssignment.Status = reviewCreateDto.ReviewStatus == "Accepted" ? "Completed" : "Reviewed";
+        taskAssignment.UpdatedAt = DateTime.UtcNow;
 
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
 
         review.Submission = null!;
-        res.success = true;
-        res.message = $"Review submitted successfully";
-        res.data = review;
+        res.Success = true;
+        res.Message = $"Review submitted successfully";
+        res.Data = review;
         return res;
 
     }
@@ -102,9 +105,9 @@ public class ReviewService : IReviewService
 
         List<Review> reviews = await _context.Reviews.ToListAsync();
 
-        res.success = true;
-        res.message = $"Reviews fetched successfully";
-        res.data = reviews;
+        res.Success = true;
+        res.Message = $"Reviews fetched successfully";
+        res.Data = reviews;
         return res;
     }
 
@@ -116,15 +119,13 @@ public class ReviewService : IReviewService
 
         if( review == null)
         {
-            res.success = false;
-            res.message = $"No Review Found with Id : {Id}";
-            _logger.LogError($"No Review found with Id : {Id}");
-            return res;
+            _logger.LogInformation($"No Review found with Id : {Id}");
+            throw new NotFoundException("No Review found for this Id");
         }
 
-        res.success = true;
-        res.message = $"Submission Found with Id : {Id}";
-        res.data = review;
+        res.Success = true;
+        res.Message = $"Submission Found with Id : {Id}";
+        res.Data = review;
         
         return res;
     }

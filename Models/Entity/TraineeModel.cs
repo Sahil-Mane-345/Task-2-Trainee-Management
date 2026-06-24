@@ -15,7 +15,7 @@ public class Trainee{
 
     public required string Status { get; set; }
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
 }

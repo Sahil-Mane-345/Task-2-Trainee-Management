@@ -5,6 +5,7 @@ using TraineeApi.Models.Entity;
 using TraineeApi.Models.MentorDTo;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Services.Redis;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -27,9 +28,9 @@ public class MentorService : IMentorService
 
         List<Mentor> mentors = await _context.Mentors.ToListAsync();
 
-        res.success = true;
-        res.message = "Mentors fetched successfully.";
-        res.data = mentors;
+        res.Success = true;
+        res.Message = "Mentors fetched successfully.";
+        res.Data = mentors;
 
         return res;
     }
@@ -44,17 +45,15 @@ public class MentorService : IMentorService
             mentor = await _context.Mentors.FirstOrDefaultAsync( m => m.Id == Id);
             if(mentor == null)
             {
-                res.success = false;
-                res.message = $"No Mentor Found with Id : {Id}";
-                _logger.LogError($"No Mentor Found with Id : {Id}");
-                return res;
+                _logger.LogError($"No Mentor found with Id : {Id}");
+                throw new NotFoundException($"Mentor Not found for this Id");
             }
             await _cache.SetAsync($"mentor:{Id}",mentor);
         }
         
-        res.success = true;
-        res.message = $"Mentor found with Id : {Id}";
-        res.data = mentor;
+        res.Success = true;
+        res.Message = $"Mentor found with Id : {Id}";
+        res.Data = mentor;
         return res;
     }
 
@@ -76,9 +75,9 @@ public class MentorService : IMentorService
 
         _logger.LogInformation($"Mentor created with Id : {mentor.Id}");
 
-        res.success = true;
-        res.message = "Mentor created successfully.";
-        res.data = mentor;
+        res.Success = true;
+        res.Message = "Mentor created successfully.";
+        res.Data = mentor;
         return res;
     }
 
@@ -89,29 +88,25 @@ public class MentorService : IMentorService
         Mentor? mentor = await _context.Mentors.FindAsync(Id);
         if( mentor == null)
         {
-            res.success = false;
-            res.message = $"No Mentor Found with Id : {Id}";
             _logger.LogError($"No Mentor found with Id : {Id}");
-            return res;
+            throw new NotFoundException($"Mentor Not found for this Id");
         }
-
-        DateTime timestamp = DateTime.UtcNow;
 
         mentor.FirstName = mentorUpdateDto.FirstName;
         mentor.LastName = mentorUpdateDto.LastName;
         mentor.Email = mentorUpdateDto.Email;
         mentor.Expertise = mentorUpdateDto.Expertise;
         mentor.Status = mentorUpdateDto.Status;
-        mentor.UpdatedDate = timestamp;
+        mentor.UpdatedDate = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
         await _cache.RemoveAsync($"mentor:{Id}");
 
         _logger.LogInformation($"Mentor data updated successfully for Id : {Id}");
-        res.success = true;
-        res.message = "Mentor Updated Successfully.";
-        res.data = mentor;
+        res.Success = true;
+        res.Message = "Mentor Updated Successfully.";
+        res.Data = mentor;
 
         return res;
     }
@@ -123,8 +118,9 @@ public class MentorService : IMentorService
         if( mentor == null)
         {
             _logger.LogError($"No Mentor found with Id : {Id}");
-            return false;
+            throw new NotFoundException($"Mentor Not found for this Id");
         }
+
         _context.Mentors.Remove(mentor);
         await _context.SaveChangesAsync();
 

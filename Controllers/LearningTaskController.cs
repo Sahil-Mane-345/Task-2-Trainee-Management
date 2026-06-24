@@ -27,10 +27,6 @@ public class LearningTaskController : ControllerBase
     public async Task<IActionResult> GetById(Guid Id)
     {
         var r = await _learningTaskService.GetLearningTaskById(Id);
-        if (!r.success)
-        {
-            return NotFound(r);
-        }
         return Ok(r);
     }
 
@@ -40,7 +36,7 @@ public class LearningTaskController : ControllerBase
         var r = await _learningTaskService.CreateLearningTask(learningTaskCreateDto);
         return CreatedAtAction(
             nameof(GetById),
-            new { Id = r?.data?.Id},
+            new { Id = r?.Data?.Id},
             r
         );
     }
@@ -50,21 +46,13 @@ public class LearningTaskController : ControllerBase
     public async Task<IActionResult> UpdateById(Guid Id, LearningTaskUpdateDto learningTaskUpdateDto)
     {
         var r = await _learningTaskService.UpdateLearningTask(Id, learningTaskUpdateDto);
-        if (!r.success){
-            return NotFound(r);
-        }else{
-            return Ok(r);
-        }
+        return Ok(r);
     }
 
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DeleteById(Guid Id){
         bool t = await _learningTaskService.DeleteLearningTaskById(Id);
-        if (t){
-            return NoContent();
-        }else{
-            return NotFound(new {message = $"Learning Task with Id : {Id} not found "});
-        }
+        return NoContent();
     }
     
 }

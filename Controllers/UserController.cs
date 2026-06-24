@@ -7,10 +7,10 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
-    public AuthController(IUserService userService)
+    public UserController(IUserService userService)
     {
         _userService = userService;
     }

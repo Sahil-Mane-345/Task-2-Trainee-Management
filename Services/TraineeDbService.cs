@@ -6,6 +6,7 @@ using TraineeApi.Context;
 using Microsoft.EntityFrameworkCore;
 using TraineeApi.Models;
 using TraineeApi.Services.Redis;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -21,18 +22,10 @@ public class TraineeDbService : ITraineeService {
         _context = context;
         _logger = logger;
         _cache = cache;
-        // Console.WriteLine("Trainee Service created");
     }
 
     public ApiResponse<PagedResponse<IQueryable<Trainee>>> GetAllTrainee(string search, int pageNumber, int pageSize, string status){
         ApiResponse<PagedResponse<IQueryable<Trainee>>> res = new();
-
-        
-        // if(search != ""){
-        //     var QuertT = TData.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).ToList();
-        //     res.message = $"Trainee fetched for search : {search}";
-        //     res.data = QuertT;
-        // }
         
         IQueryable<Trainee> QuerT = _context.Trainees.Where( t => t.FirstName.Contains(search) || t.LastName.Contains(search) || t.Email.Contains(search) || t.TechStack.Contains(search)).Where( t => status.Equals("") || t.Status.Equals(status)).OrderBy( t => t.CreatedAt);
 
@@ -42,54 +35,47 @@ public class TraineeDbService : ITraineeService {
         var Skip = (pageNumber - 1) * pageSize;
         IQueryable<Trainee> PageR = QuerT.Skip(Skip).Take(pageSize);
         
-        res.success = true;
-        res.message = "Trainees fetched successfully.";
+        res.Success = true;
+        res.Message = "Trainees fetched successfully.";
         
-        PagedResponse<IQueryable<Trainee>> pageRes = new PagedResponse<IQueryable<Trainee>>
+        PagedResponse<IQueryable<Trainee>> pageRes = new()
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalRecords = TotalCount,
             Data = PageR
         };
-        res.data = pageRes;
+        res.Data = pageRes;
         return res;
     }
 
     public async Task<ApiResponse<Trainee>> GetTraineeById(Guid Id){
-        ApiResponse<Trainee> res = new ApiResponse<Trainee>();
+        ApiResponse<Trainee> res =new();
 
         Trainee? trainee = await _cache.GetAsync<Trainee>($"trainee:{Id}");
 
         if( trainee == null)
         {
             var t = await _context.Trainees.FindAsync(Id);
-            if ( t == null ){
-                res.success = false;
-                res.message = $"No Trainee Found with Id : {Id}";
+            if( t == null ){
                 _logger.LogError($"No Trainee found with Id : {Id}");
-                return res;
+                throw new NotFoundException($"Trainee Not found for this Id");
             }
 
             await _cache.SetAsync($"trainee:{Id}",t);
-            res.success = true;
-            res.message = $"Trainee found with Id from DB : {Id}";
-            res.data = t;
+            res.Success = true;
+            res.Message = $"Trainee found with Id from DB : {Id}";
+            res.Data = t;
             return res;
         }
-
-
-
-        
-        res.success = true;
-        res.message = $"Trainee found with Id  from cache: {Id}";
-        res.data = trainee;
+        res.Success = true;
+        res.Message = $"Trainee found with Id  from cache: {Id}";
+        res.Data = trainee;
         return res;
     }
 
     public async Task<ApiResponse<Trainee>> CreateTrainee(CreateTraineeRequest newTrainee){
         ApiResponse<Trainee> res = new ApiResponse<Trainee>();
-        DateTime timestamp = DateTime.Now;
 
         Trainee t = new Trainee{
             FirstName = newTrainee.FirstName!,
@@ -97,7 +83,7 @@ public class TraineeDbService : ITraineeService {
             Email = newTrainee.Email!,
             TechStack = newTrainee.TechStack!,
             Status = newTrainee.Status!,
-            CreatedAt = timestamp
+            CreatedAt = DateTime.UtcNow
             };
 
             await _context.Trainees.AddAsync(t);
@@ -105,9 +91,9 @@ public class TraineeDbService : ITraineeService {
 
             _logger.LogInformation($"Trainee created with Id : {t.Id}");
 
-            res.success = true;
-            res.message = "Trainee created successfully.";
-            res.data = t;
+            res.Success = true;
+            res.Message = "Trainee created successfully.";
+            res.Data = t;
             return res;
     }
 
@@ -116,37 +102,35 @@ public class TraineeDbService : ITraineeService {
 
         var t = await _context.Trainees.FindAsync(Id);
         if ( t == null ){
-            res.success = false;
-            res.message = $"No Trainee Found with Id : {Id}";
             _logger.LogError($"No Trainee found with Id : {Id}");
-            return res;
+            throw new NotFoundException($"Trainee Not found for this Id");
         }
 
-        DateTime timestamp = DateTime.Now;
         t.FirstName = updateTrainee.FirstName;
         t.LastName = updateTrainee.LastName;
         t.Email = updateTrainee.Email;
         t.TechStack = updateTrainee.TechStack;
         t.Status = updateTrainee.Status;
-        t.UpdatedAt = timestamp;
+        t.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
         _logger.LogInformation($"Trainee data updated successfully for Id : {Id}");
 
         await _cache.RemoveAsync($"trainee:{Id}");
 
-        res.success = true;
-        res.message = "Trainee Updated Successfully.";
-        res.data = t;
+        res.Success = true;
+        res.Message = "Trainee Updated Successfully.";
+        res.Data = t;
 
         return res;
     }
 
     public async Task<bool> DeleteTraineeById(Guid Id){
         var t = await _context.Trainees.FindAsync(Id);
+
         if( t == null){
             _logger.LogError($"No Trainee found with Id : {Id}");
-            return false;
+            throw new NotFoundException($"Trainee Not found for this Id");
         }
         _context.Trainees.Remove(t);
         await _context.SaveChangesAsync();

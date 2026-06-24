@@ -31,10 +31,7 @@ public class ReviewController : ControllerBase
     public async Task<IActionResult> GetById(Guid Id)
     {
         var r = await _reviewService.GetReviewById(Id);
-        if (!r.success)
-        {
-            return NotFound(r);
-        }
+        
         return Ok(r);
     }
 
@@ -45,7 +42,7 @@ public class ReviewController : ControllerBase
 
         return CreatedAtAction(
             nameof(GetById),
-            new { Id = r.data?.Id},
+            new { Id = r.Data?.Id},
             r
         );
     }

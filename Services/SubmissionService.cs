@@ -5,6 +5,7 @@ using TraineeApi.Models.Entity;
 using TraineeApi.Models.SubmissionDTO;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Services.Redis;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.Services;
 
@@ -30,7 +31,7 @@ public class SubmissionService : ISubmissionService
         if (!TaskAssignment)
         {
             _logger.LogInformation($"No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}");
-            throw new ArgumentException("Task Assignment with such Id does not exist");
+            throw new InvalidIdentifierException("Task Assignment with such Id does not exist");
         }
 
         Submission? existingSubmission = await _context.Submissions.FirstOrDefaultAsync( s => s.TaskAssignmentId == submissionCreateDto.TaskAssignmentId);
@@ -45,9 +46,9 @@ public class SubmissionService : ISubmissionService
 
             await _context.SaveChangesAsync();
             await _cache.RemoveAsync($"submission:{existingSubmission.Id}");
-            res.success = true;
-            res.message = $"Submission with Id : {existingSubmission?.Id} resubmitted successfully";
-            res.data = existingSubmission;
+            res.Success = true;
+            res.Message = $"Submission with Id : {existingSubmission?.Id} resubmitted successfully";
+            res.Data = existingSubmission;
 
             return res;
         }
@@ -62,19 +63,23 @@ public class SubmissionService : ISubmissionService
         };
         TaskAssignment? taskAssignment = await _context.TaskAssignments.FindAsync(submission.TaskAssignmentId);
 
-        if(taskAssignment != null)
+        if(taskAssignment == null)
         {
-            taskAssignment.Status = "Submitted";
-            taskAssignment.UpdatedAt = DateTime.UtcNow;
+            _logger.LogInformation($"No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}");
+            throw new InvalidIdentifierException("Task Assignment with such Id does not exist");
         }
+
+        taskAssignment.Status = "Submitted";
+        taskAssignment.UpdatedAt = DateTime.UtcNow;
+
         await _context.Submissions.AddAsync(submission);
         await _context.SaveChangesAsync();
 
         submission.TaskAssignment = null!;
 
-        res.success = true;
-        res.message = $"Submission submitted successfully";
-        res.data = submission;
+        res.Success = true;
+        res.Message = $"Submission submitted successfully";
+        res.Data = submission;
         return res;
 
 
@@ -86,9 +91,9 @@ public class SubmissionService : ISubmissionService
         
         List<Submission> submissions = await _context.Submissions.ToListAsync();
 
-        res.success = true;
-        res.message = $"Submissions fetched successfully";
-        res.data = submissions;
+        res.Success = true;
+        res.Message = $"Submissions fetched successfully";
+        res.Data = submissions;
         return res;
     }
 
@@ -103,19 +108,17 @@ public class SubmissionService : ISubmissionService
 
             if( submission == null)
             {
-                res.success = false;
-                res.message = $"No Submission Found with Id : {Id}";
-                _logger.LogError($"No Submission found with Id : {Id}");
-                return res;
+               _logger.LogInformation($"No Submission found with Id : {Id}");
+            throw new NotFoundException("No Submission found for this Id"); 
             }
 
             await _cache.SetAsync($"submission:{Id}",submission);
         }
         
 
-        res.success = true;
-        res.message = $"Submission Found with Id : {Id}";
-        res.data = submission;
+        res.Success = true;
+        res.Message = $"Submission Found with Id : {Id}";
+        res.Data = submission;
         
         return res;
     }

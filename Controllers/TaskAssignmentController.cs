@@ -30,10 +30,6 @@ public class TaskAssignmentController : ControllerBase
     public async Task<IActionResult> GetById(Guid Id)
     {
         var r = await _taskAssignmentService.GetTaskAssignemntById(Id);
-        if (!r.success)
-        {
-            return NotFound(r);
-        }
         return Ok(r);
     }
 
@@ -44,7 +40,7 @@ public class TaskAssignmentController : ControllerBase
 
         return CreatedAtAction(
             nameof(GetById),
-            new { Id = r.data?.Id},
+            new { Id = r.Data?.Id},
             r
         );
     }
@@ -53,13 +49,6 @@ public class TaskAssignmentController : ControllerBase
     public async Task<IActionResult> updateStatus(Guid Id, TaskAssignmentUpdateStatusDto taskAssignmentUpdateStatusDto)
     {
         var r = await _taskAssignmentService.UpdateTaskAssignemntStatus(Id, taskAssignmentUpdateStatusDto);
-        if (!r.success)
-        {
-            return NotFound(r);
-        }
-        else
-        {
-            return Ok(r);
-        }
+        return Ok(r);
     }
 }

@@ -1,8 +1,10 @@
+using TraineeApi.Utility.Exception;
+
 namespace TraineeApi.Utility;
 
 public static class SubmissionFilesValidator
 {
-    public static (bool status, string Message) ValidateFiles(IFormFileCollection formFiles)
+    public static void ValidateFiles(IFormFileCollection formFiles)
     {
         int maxFileSize = 10 * 1024 * 1024;
 
@@ -12,19 +14,19 @@ public static class SubmissionFilesValidator
         {
             if( file == null)
             {
-                return (false, "No file should be null");
+                throw new InvalidFileValidationException("File should not be null");
             }
 
             if( file.Length > maxFileSize)
             {
-                return (false, $"No file should exceed limit of {maxFileSize / ( 1024 * 1024)} MB");
+                throw new InvalidFileValidationException($"No file should exceed limit of {maxFileSize / ( 1024 * 1024)} MB");
             }
 
             if(!allowedExtensions.Contains(Path.GetExtension(file.FileName)))
             {
-                return ( false, $"No file should be other than allowed extensions {string.Join(", ", allowedExtensions)}");
+                throw new InvalidFileValidationException( $"No file should be other than allowed extensions {string.Join(", ", allowedExtensions)}");
             }
         }
-            return (true , "Validation passed");
+            
     }
 }
