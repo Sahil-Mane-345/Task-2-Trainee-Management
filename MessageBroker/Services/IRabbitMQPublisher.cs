@@ -4,5 +4,5 @@ namespace TraineeApi.MessageBroker.Services;
 
 public interface IRabbitMQPublisher
 {
-    Task PublishFileMessageAsync(SubmissionProcessingRequestDto message, string queueName);
+    Task PublishFileMessageAsync<T>(T message, string queueName, string CorrelationId, string MessageId);
 }

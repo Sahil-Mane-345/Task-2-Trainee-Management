@@ -19,18 +19,16 @@ public class LocalFileStorageService : IFileStorageService
 
     private readonly IConfiguration _configuration;
 
-    private readonly HttpContext _httpContext;
-    private readonly IRabbitMQPublisher _rabbitMQPublisher;
+    private readonly IProcessingJobService _processingJobService;
 
-    public LocalFileStorageService( IConfiguration configuration, AppDbContext context , IHttpContextAccessor httpContextAccessor, IRabbitMQPublisher rabbitMQPublisher)
+    public LocalFileStorageService( IConfiguration configuration, AppDbContext context , IProcessingJobService processingJobService)
     {
         _configuration = configuration;
         _context = context;
-        _httpContext = httpContextAccessor.HttpContext!;
-        _rabbitMQPublisher = rabbitMQPublisher;
+        _processingJobService = processingJobService;
     }
 
-    public async Task<ApiResponse<object>> SaveAsync(Guid submissionId, IFormFileCollection FormFiles)
+    public async Task<ApiResponse<object>> SaveAsync(Guid submissionId, Guid UserId,IFormFileCollection FormFiles)
     {
         bool submissionExists = await _context.Submissions.AnyAsync( s => s.Id == submissionId);
 
@@ -58,9 +56,7 @@ public class LocalFileStorageService : IFileStorageService
                 await file.CopyToAsync(stream);
             }
 
-            var userId = _httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            Guid guid = new(userId!);
             SubmissionFile submissionFile = new()
             {
                 Id = fileId,
@@ -70,21 +66,13 @@ public class LocalFileStorageService : IFileStorageService
                 ContentType = file.ContentType,
                 Size = file.Length,
                 CheckSum = checksum,
-                UserId = new Guid(userId!),
+                UserId = UserId,
             };
 
             await _context.AddAsync(submissionFile);
             await _context.SaveChangesAsync();
+            await _processingJobService.CreateJob(fileId);
             submissionFiles.Add(submissionFile);
-
-            SubmissionProcessingRequestDto submissionProcessingRequestDto = new()
-            {
-                SubmissionId = submissionId,
-                SubmissionFileId = submissionFile.Id,
-            };
-
-            await _rabbitMQPublisher.PublishFileMessageAsync(submissionProcessingRequestDto, RabbitMQQueues.SubmissionProcessing);
-
         }
         
         res.Success = true;

@@ -7,6 +7,7 @@ using TraineeApi.MessageBroker.Constants;
 using TraineeApi.MessageBroker.Entity;
 using TraineeApi.Models.Entity;
 using TraineeApi.Models.SubmissionDTO;
+using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.MessageBroker.Services;
 
@@ -14,16 +15,14 @@ public class RabbitMQPublisher : IRabbitMQPublisher
 {
     private readonly ConnectionFactory _connection;
     private readonly ILogger<RabbitMQPublisher> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public RabbitMQPublisher(ConnectionFactory connection, ILogger<RabbitMQPublisher> logger, IServiceScopeFactory serviceScopeFactory )
+    public RabbitMQPublisher(ConnectionFactory connection, ILogger<RabbitMQPublisher> logger )
     {
         _logger = logger;
         _connection = connection;
-        _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public async Task PublishFileMessageAsync(SubmissionProcessingRequestDto message, string queueName)
+    public async Task PublishFileMessageAsync<T>(T message, string queueName, string CorrelationId, string MessageId)
     {
         
 
@@ -33,7 +32,7 @@ public class RabbitMQPublisher : IRabbitMQPublisher
             using var channel = await connection.CreateChannelAsync();
 
             await channel.QueueDeclareAsync(
-            queue: RabbitMQConstants.SubmissionProcessingQueue,
+            queue: queueName,
             durable: true,
             exclusive: false,
             autoDelete: false,
@@ -48,25 +47,12 @@ public class RabbitMQPublisher : IRabbitMQPublisher
             var properties = new BasicProperties
             {
                 Persistent = true,
-                CorrelationId = Guid.NewGuid().ToString(),
-                MessageId = Guid.NewGuid().ToString(),
+                CorrelationId = CorrelationId,
+                MessageId = MessageId,
                 Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds())
             };
             
-            ProcessingJob processingJob = new()
-            {
-                CorrelationId = properties.CorrelationId,
-                SubmissionFileId = message.SubmissionFileId,
-                MessageId = properties.MessageId,
-                Status = "Queued"
-            };
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
             await Task.Run( async () => await channel.BasicPublishAsync(exchange: "", routingKey : queueName, body: body, basicProperties: properties, mandatory: false));
-            await db.ProcessingJobs.AddAsync(processingJob);
-            await db.SaveChangesAsync();
 
         }
         catch (System.Exception)

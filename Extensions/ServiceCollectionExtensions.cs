@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITaskAssignmentService, TaskAssignmentService>();
         services.AddScoped<ISubmissionService, SubmissionService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IProcessingJobService, ProcessingJobService>();
 
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 

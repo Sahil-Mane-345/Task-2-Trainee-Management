@@ -6,7 +6,7 @@ namespace TraineeApi.Services.Interfaces;
 
 public interface IFileStorageService
 {
-    Task<ApiResponse<object>> SaveAsync(Guid SUbmissionId, IFormFileCollection FormFiles);
+    Task<ApiResponse<object>> SaveAsync(Guid SUbmissionId,Guid UserId, IFormFileCollection FormFiles);
 
     Task<ApiResponse<SubmissionFileDownloadDto>> OpenReadAsync(Guid submissionFileId);
 

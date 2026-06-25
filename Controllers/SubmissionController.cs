@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TraineeApi.Models;
@@ -50,7 +51,8 @@ public class SubmissionController : ControllerBase
     [HttpPost("{submissionId}/files")]
     public async Task<IActionResult> SubmitFiles(Guid submissionId, SubmissionFilesDto submissionFilesDto)
     {
-        var res = await _fileStorageService.SaveAsync(submissionId, submissionFilesDto.SubmissionFiles!);
+        var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var res = await _fileStorageService.SaveAsync(submissionId, new Guid(userId!) ,submissionFilesDto.SubmissionFiles!);
         return Ok(res);
     }
 
