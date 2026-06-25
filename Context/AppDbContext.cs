@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TraineeApi.MessageBroker.Entity;
 using TraineeApi.Models.Entity;
 
 namespace TraineeApi.Context;
@@ -26,6 +27,8 @@ public class AppDbContext : DbContext
     public DbSet<Submission> Submissions { get; set; }
 
     public DbSet<SubmissionFile> SubmissionFiles { get; set; }
+
+    public DbSet<ProcessingJob> ProcessingJobs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
 {

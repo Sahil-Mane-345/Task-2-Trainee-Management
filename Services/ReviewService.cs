@@ -66,6 +66,7 @@ public class ReviewService : IReviewService
             res.Success = true;
             res.Message = "Review Submitted successfully";
             res.Data = existingReview;
+            return res;
         }
 
         Review review = new()

@@ -1,6 +1,8 @@
+using TraineeApi.Models.SubmissionDTO;
+
 namespace TraineeApi.MessageBroker.Services;
 
 public interface IRabbitMQPublisher
 {
-    Task PublishMessageAsync<T>(T message, string queueName);
+    Task PublishFileMessageAsync(SubmissionProcessingRequestDto message, string queueName);
 }

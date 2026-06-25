@@ -56,8 +56,6 @@ public class LocalFileStorageService : IFileStorageService
             using( var stream = File.Create(FilePath))
             {
                 await file.CopyToAsync(stream);
-                
-                Console.WriteLine($"Checksum : {checksum}");
             }
 
             var userId = _httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -82,10 +80,10 @@ public class LocalFileStorageService : IFileStorageService
             SubmissionProcessingRequestDto submissionProcessingRequestDto = new()
             {
                 SubmissionId = submissionId,
-                FileId = submissionFile.Id,
+                SubmissionFileId = submissionFile.Id,
             };
 
-            await _rabbitMQPublisher.PublishMessageAsync(submissionProcessingRequestDto, RabbitMQQueues.SubmissionProcessing);
+            await _rabbitMQPublisher.PublishFileMessageAsync(submissionProcessingRequestDto, RabbitMQQueues.SubmissionProcessing);
 
         }
         
