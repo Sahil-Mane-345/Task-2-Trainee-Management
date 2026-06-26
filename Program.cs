@@ -3,6 +3,7 @@ using TraineeApi.Utility;
 using System.Text.Json.Serialization;
 using TraineeApi.Extensions;
 using RabbitMQ.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,10 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddProblemDetails();
+
+builder.Services.AddHealthChecks();
+
+builder.Services.AddHealthChecksExtension(builder.Configuration);
 
 
 
@@ -77,6 +82,7 @@ app.MapGet("/", () =>
     return Results.Ok($"Welcome to Trainee Management System");
 });
 
+app.MapHealthChecks("/healthz");
 
 await app.SeedDatabaseAsync();
 

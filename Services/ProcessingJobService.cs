@@ -68,7 +68,6 @@ public class ProcessingJobService : IProcessingJobService
         processingJob.Attempts = 0;
         processingJob.ErrorSummary = "";
         processingJob.Status = "Queued";
-        processingJob.MessageId = Guid.NewGuid().ToString();
 
         SubmissionProcessingRequestDto submissionProcessingRequestDto = new()
         {

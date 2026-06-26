@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TraineeApi.Context;
 using TraineeApi.Models.Entity;
 using TraineeApi.Utility;
@@ -11,6 +12,8 @@ public static class WebApplicationExtensions
         using var scope = app.Services.CreateAsyncScope();
 
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        context.Database.Migrate();
 
         if( !context.Users.Any())
         {

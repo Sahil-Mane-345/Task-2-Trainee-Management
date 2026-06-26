@@ -1,12 +1,15 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 using TraineeApi.Context;
 using TraineeApi.MessageBroker;
 using TraineeApi.MessageBroker.Services;
 using TraineeApi.Services;
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Services.Redis;
+
 
 namespace TraineeApi.Extensions;
 
@@ -89,6 +92,22 @@ public static class ServiceCollectionExtensions
             );
         });
 
+        return services;
+    }
+
+    public static IServiceCollection AddHealthChecksExtension(this IServiceCollection services, IConfiguration configuration)
+    {
+
+        services.AddHealthChecks().AddMySql(
+            configuration.GetConnectionString("DefaultConnection")!,
+            name: "MySQL"
+        ).AddRedis(
+            configuration.GetConnectionString("RedisConnection")!,
+            name: "Redis"
+        ).AddRabbitMQ(
+            async sp => await sp.GetRequiredService<ConnectionFactory>().CreateConnectionAsync(),
+            name: "RabbitMQ"
+        );
         return services;
     }
 }
