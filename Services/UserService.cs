@@ -71,7 +71,7 @@ public class UserService : IUserService
             issuer: _configuration["JWT:Issuer"],
             audience: _configuration["JWT:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddSeconds(Convert.ToInt32(_expiresIn)),
+            expires: DateTime.UtcNow.AddSeconds(Convert.ToInt32(_expiresIn)),
             signingCredentials: creds
         );
 

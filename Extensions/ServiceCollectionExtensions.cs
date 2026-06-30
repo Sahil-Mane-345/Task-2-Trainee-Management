@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RabbitMQ.Client;
 using StackExchange.Redis;
 using TraineeApi.Context;
@@ -54,12 +53,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddRedisContext(this IServiceCollection services, IConfiguration configuration)
     {
-        // services.AddStackExchangeRedisCache( options =>
-        // {
-        //     options.Configuration = configuration.GetConnectionString("RedisConnection");
-        //     options.InstanceName = "TraineeManagementApi";
-        // });
-
         services.AddSingleton<IConnectionMultiplexer>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<Program>>();
@@ -78,7 +71,7 @@ public static class ServiceCollectionExtensions
                 logger.LogInformation(args.Exception, "Redis Connection Restored. Endpoint: {Endpoint}", args.EndPoint);
 
             redis.ErrorMessage += (sender, args) =>
-                logger.LogError(args.Message, "Redis Error. Endpoint: {Endpoint}", args.EndPoint);
+                logger.LogError("Redis Error. Endpoint: {Endpoint}", args.EndPoint);
 
             redis.ConfigurationChanged += (sender, args) =>
                 logger.LogInformation("Redis Connection Configuration Changed. Endpoint: {Endpoint}", args.EndPoint);
@@ -86,6 +79,26 @@ public static class ServiceCollectionExtensions
             return redis;
         });
 
+        return services;
+    }
+
+    public static IServiceCollection AddRabbitMQContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        IConfigurationSection rabbitMQSection = configuration.GetSection("RabbitMQ");
+
+        services.AddSingleton( sp => new ConnectionFactory()
+        {
+            HostName = rabbitMQSection["HostName"]!,
+            Port = Convert.ToInt32(rabbitMQSection["Port"]),
+            UserName = rabbitMQSection["UserName"]!,
+            Password = rabbitMQSection["Password"]!,
+            VirtualHost = rabbitMQSection["VirtualHost"]!,
+
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+
+            TopologyRecoveryEnabled = true
+        });
         return services;
     }
 

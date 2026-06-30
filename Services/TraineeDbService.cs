@@ -1,9 +1,7 @@
 using TraineeApi.Models.TraineeDTO;
 using TraineeApi.Models.Entity;
-
 using TraineeApi.Services.Interfaces;
 using TraineeApi.Context;
-using Microsoft.EntityFrameworkCore;
 using TraineeApi.Models;
 using TraineeApi.Services.Redis;
 using TraineeApi.Utility.Exception;

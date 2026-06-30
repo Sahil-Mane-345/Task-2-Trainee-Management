@@ -63,6 +63,7 @@ public class ProcessingJobService : IProcessingJobService
         ProcessingJob processingJob = await _context.ProcessingJobs.FindAsync(processingJobId) ?? throw new NotFoundException("Process Job Not found with such Id");
         if( ! processingJob.Status.Equals("Failed"))
         {
+            Console.WriteLine(processingJob.Status);
             throw new Exception("Process Job is not Failed you cant retry");
         }
         processingJob.Attempts = 0;

@@ -1,6 +1,6 @@
 
 using System.Text.Json;
-using Microsoft.Extensions.Caching.Distributed;
+
 using StackExchange.Redis;
 
 namespace TraineeApi.Services.Redis;

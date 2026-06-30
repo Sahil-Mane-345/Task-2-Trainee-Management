@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using TraineeApi.Utility.Exception;
 namespace TraineeApi.Utility;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
+    private readonly ILogger<GlobalExceptionHandler> _logger;
+
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+    {
+        _logger = logger;
+    }
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, System.Exception exception, CancellationToken cancellationToken)
     {
 
@@ -24,6 +29,11 @@ public class GlobalExceptionHandler : IExceptionHandler
 
             _ => StatusCodes.Status500InternalServerError
         };
+
+        if(StatusCode == StatusCodes.Status500InternalServerError)
+        {
+            _logger.LogError(exception, "An Unexpected Error Occurred");
+        }
 
         problemDetails.Status = StatusCode;
 

@@ -1,13 +1,8 @@
 using System.Text;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using TraineeApi.Context;
+using RabbitMQ.Client.Exceptions;
 using TraineeApi.MessageBroker.Constants;
-using TraineeApi.MessageBroker.Entity;
-using TraineeApi.Models.Entity;
-using TraineeApi.Models.SubmissionDTO;
-using TraineeApi.Utility.Exception;
 
 namespace TraineeApi.MessageBroker.Services;
 
@@ -55,9 +50,9 @@ public class RabbitMQPublisher : IRabbitMQPublisher
             await Task.Run( async () => await channel.BasicPublishAsync(exchange: "", routingKey : queueName, body: body, basicProperties: properties, mandatory: false));
 
         }
-        catch (System.Exception)
+        catch (BrokerUnreachableException ex)
         {
-            _logger.LogError("Rabbitmq is not working");
+            _logger.LogError(ex, "Rabbitmq is not working");
         }
     }
 }

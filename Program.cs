@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+
 using TraineeApi.Utility;
-using System.Text.Json.Serialization;
+
 using TraineeApi.Extensions;
-using RabbitMQ.Client;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,23 +15,14 @@ builder.Logging.AddConsole();
 
 builder.Services.AddApiConfiguration();
 
-var rabbitMQSection = builder.Configuration.GetSection("RabbitMQ");
-
-builder.Services.AddSingleton( sp => new ConnectionFactory()
-{
-    HostName = rabbitMQSection["HostName"]!,
-    Port = Convert.ToInt32(rabbitMQSection["Port"]),
-    UserName = rabbitMQSection["UserName"]!,
-    Password = rabbitMQSection["Password"]!,
-    VirtualHost = rabbitMQSection["VirtualHost"]!,
-});
-
 
 builder.Services.AddStaticServices(builder.Configuration);
 
 builder.Services.AddDbContext(builder.Configuration);
 
 builder.Services.AddRedisContext(builder.Configuration);
+
+builder.Services.AddRabbitMQContext(builder.Configuration);
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
@@ -57,14 +47,11 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
     app.MapOpenApi();
     app.UseSwaggerUi(options =>
     {
         options.DocumentPath = "/openapi/v1.json";
     });
-}
 
 
 app.UseHttpsRedirection();

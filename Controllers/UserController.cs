@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using TraineeApi.Context;
 using TraineeApi.Models.UserDTO;
-using TraineeApi.Models.Entity;
 using TraineeApi.Services.Interfaces;
 namespace TraineeApi.Controllers;
 

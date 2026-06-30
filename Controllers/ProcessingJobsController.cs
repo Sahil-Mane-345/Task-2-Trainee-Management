@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TraineeApi.MessageBroker.Entity;
-using TraineeApi.MessageBroker.Services;
+
 using TraineeApi.Services.Interfaces;
 
 namespace TraineeApi.Controllers;
