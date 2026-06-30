@@ -1,19 +1,19 @@
 version: "3.8"
 
 services:
-  redis:
+  redis-smp:
     image: docker-registry-002.zeuslearning.com/zeuslearning/redis:7-alpine
-    container_name: redis
+    container_name: redis-smp
     ports:
       - "6379:6379"
     volumes: 
-      - redis-data:/data
+      - redis-data-smp:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
 
-  rabbitmq:
+  rabbitmq-smp:
     image: docker-registry-002.zeuslearning.com/zeuslearning/rabbitmq:3.13.7-management
-    container_name: rabbitmq
+    container_name: rabbitmq-smp
     restart: unless-stopped
     ports:
       - 5672:5672
@@ -22,14 +22,14 @@ services:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
     volumes:
-      - rabbitmq-lib:/var/lib/rabbitmq/
-      - rabbitmq-log:/var/log/rabbitmq
+      - rabbitmq-lib-smp:/var/lib/rabbitmq/
+      - rabbitmq-log-smp:/var/log/rabbitmq
 
 
 volumes:
-  redis-data:
+  redis-data-smp:
     driver: local
-  rabbitmq-lib:
+  rabbitmq-lib-smp:
     driver: local
-  rabbitmq-log:
+  rabbitmq-log-smp:
     driver: local

@@ -45,7 +45,7 @@ public class MentorService : IMentorService
             mentor = await _context.Mentors.FirstOrDefaultAsync( m => m.Id == Id);
             if(mentor == null)
             {
-                _logger.LogError($"No Mentor found with Id : {Id}");
+                _logger.LogWarning("Mentor Not Found. MentorId : {Id}", Id);
                 throw new NotFoundException($"Mentor Not found for this Id");
             }
             await _cache.SetAsync($"mentor:{Id}",mentor);
@@ -73,7 +73,7 @@ public class MentorService : IMentorService
         await _context.Mentors.AddAsync(mentor);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation($"Mentor created with Id : {mentor.Id}");
+        _logger.LogInformation("Mentor created with Id : {mentor.Id}", mentor.Id);
 
         res.Success = true;
         res.Message = "Mentor created successfully.";
@@ -88,7 +88,7 @@ public class MentorService : IMentorService
         Mentor? mentor = await _context.Mentors.FindAsync(Id);
         if( mentor == null)
         {
-            _logger.LogError($"No Mentor found with Id : {Id}");
+            _logger.LogWarning("Mentor Not Found. MentorId : {Id}", Id);
             throw new NotFoundException($"Mentor Not found for this Id");
         }
 
@@ -103,7 +103,7 @@ public class MentorService : IMentorService
 
         await _cache.RemoveAsync($"mentor:{Id}");
 
-        _logger.LogInformation($"Mentor data updated successfully for Id : {Id}");
+        _logger.LogInformation("Mentor data updated successfully for Id : {Id}",Id);
         res.Success = true;
         res.Message = "Mentor Updated Successfully.";
         res.Data = mentor;
@@ -117,7 +117,7 @@ public class MentorService : IMentorService
 
         if( mentor == null)
         {
-            _logger.LogError($"No Mentor found with Id : {Id}");
+            _logger.LogWarning("Mentor Not Found. MentorId : {Id}", Id);
             throw new NotFoundException($"Mentor Not found for this Id");
         }
 
@@ -125,7 +125,7 @@ public class MentorService : IMentorService
         await _context.SaveChangesAsync();
 
         await _cache.RemoveAsync($"mentor:{Id}");
-        _logger.LogInformation($"Mentor deletd succesfully with Id : {Id}");
+        _logger.LogInformation("Mentor deletd succesfully with Id : {Id}",Id);
         return true;
     }
 }

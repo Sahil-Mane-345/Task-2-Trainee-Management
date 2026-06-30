@@ -36,21 +36,21 @@ public class TaskAssignmentService : ITaskAssignmentService
         bool mentor = await _context.Mentors.AnyAsync( m => m.Id == taskAssignmentCreateDto.MentorId);
         if( !mentor)
         {
-            _logger.LogInformation($"No Mentor found with Id : {taskAssignmentCreateDto.MentorId}");
+            _logger.LogWarning("No Mentor found with Id : {taskAssignmentCreateDto.MentorId}", taskAssignmentCreateDto.MentorId);
             throw new InvalidIdentifierException("Mentor with such Id does not exist");
         }
 
         bool trainee = await _context.Trainees.AnyAsync( t => t.Id == taskAssignmentCreateDto.TraineeId);
         if( !trainee)
         {
-            _logger.LogInformation($"No Trainee found with Id : {taskAssignmentCreateDto.TraineeId}");
+            _logger.LogWarning("No Trainee found with Id : {taskAssignmentCreateDto.TraineeId}",taskAssignmentCreateDto.TraineeId);
             throw new InvalidIdentifierException("Trainee with such Id does not exist");
         }
 
         bool learningTask = await _context.LearningTasks.AnyAsync( l => l.Id == taskAssignmentCreateDto.LearningTaskId);
         if( !learningTask)
         {
-            _logger.LogInformation($"No Learning Task found with Id : {taskAssignmentCreateDto.LearningTaskId}");
+            _logger.LogWarning("No Learning Task found with Id : {taskAssignmentCreateDto.LearningTaskId}",taskAssignmentCreateDto.LearningTaskId);
             throw new InvalidIdentifierException("Learning Task with such Id does not exist");
         }
 
@@ -67,10 +67,13 @@ public class TaskAssignmentService : ITaskAssignmentService
 
         await _context.TaskAssignments.AddAsync(taskAssignment);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Task Assignment Created Successfully. TaskAssignmentId: {Id}", taskAssignment.Id);
         
         res.Success = true;
         res.Message = "Task Assignment Created Successfully";
         res.Data = taskAssignment;
+
 
         return res;
     }
@@ -95,7 +98,7 @@ public class TaskAssignmentService : ITaskAssignmentService
             taskAssignment = await _context.TaskAssignments.FindAsync(Id);
             if(taskAssignment == null)
             {
-                _logger.LogInformation($"No Task found with Id : {Id}");
+                _logger.LogWarning("No Task Assignment found with Id : {Id}", Id);
                 throw new NotFoundException("No Task Assigned found for this Id");
             }
             await _cache.SetAsync($"taskassignment:{Id}",taskAssignment);
@@ -113,7 +116,7 @@ public class TaskAssignmentService : ITaskAssignmentService
         TaskAssignment? taskAssignment = await _context.TaskAssignments.FindAsync(Id);
         if(taskAssignment == null)
         {
-            _logger.LogInformation($"No Task found with Id : {Id}");
+            _logger.LogWarning("No Task found with Id : {Id}",Id);
             throw new NotFoundException("No Task Assigned found for this Id");
         }
         
@@ -122,6 +125,7 @@ public class TaskAssignmentService : ITaskAssignmentService
 
         await _context.SaveChangesAsync();
         await _cache.RemoveAsync($"taskassignment:{Id}");
+        _logger.LogInformation("Task Assignment deleted successfully. Id: {Id}", Id);
 
         res.Success = true;
         res.Message = $"Task Assignment Status Updated for Id : {Id}";

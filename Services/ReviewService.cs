@@ -28,7 +28,7 @@ public class ReviewService : IReviewService
 
         if (submission == null)
         {
-            _logger.LogInformation($"No Submission found with Id : {reviewCreateDto.SubmissionId}");
+            _logger.LogWarning("No Submission found with Id : {reviewCreateDto.SubmissionId}",reviewCreateDto.SubmissionId);
             throw new InvalidIdentifierException("Submission with such Id does not exist");
         }
 
@@ -36,7 +36,7 @@ public class ReviewService : IReviewService
 
         if (!mentor)
         {
-            _logger.LogInformation($"No Mentor found with Id : {reviewCreateDto.MentorId}");
+            _logger.LogWarning("No Mentor found with Id : {reviewCreateDto.MentorId}",reviewCreateDto.MentorId);
             throw new InvalidIdentifierException("Mentor with such Id does not exist");
         }
 
@@ -54,7 +54,7 @@ public class ReviewService : IReviewService
 
             if(taskAssignment == null)
             {
-                _logger.LogInformation($"No Task found with Id : {submission.TaskAssignmentId}");
+                _logger.LogWarning("No Task found with Id : {submission.TaskAssignmentId}",submission.TaskAssignmentId);
                 throw new NotFoundException("No Task Assigned found for this Id");
             }
 
@@ -82,7 +82,7 @@ public class ReviewService : IReviewService
 
         if(taskAssignment == null)
         {
-            _logger.LogInformation($"No Task found with Id : {submission.TaskAssignmentId}");
+            _logger.LogWarning("No Task found with Id : {submission.TaskAssignmentId}",submission.TaskAssignmentId);
             throw new NotFoundException("No Task Assigned found for this Id");
         }
 
@@ -91,6 +91,8 @@ public class ReviewService : IReviewService
 
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Review Submitted successfully. Id: {review.Id}", review.Id);
 
         review.Submission = null!;
         res.Success = true;
@@ -120,7 +122,7 @@ public class ReviewService : IReviewService
 
         if( review == null)
         {
-            _logger.LogInformation($"No Review found with Id : {Id}");
+            _logger.LogWarning("No Review found with Id : {Id}", Id);
             throw new NotFoundException("No Review found for this Id");
         }
 

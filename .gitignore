@@ -6,6 +6,11 @@
 # dotenv files
 .env
 
+Dockerfile
+NuGet.Config
+token.txt
+
+
 # User-specific files
 *.rsuser
 *.suo

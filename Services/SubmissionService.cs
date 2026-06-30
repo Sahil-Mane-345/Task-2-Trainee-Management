@@ -30,7 +30,7 @@ public class SubmissionService : ISubmissionService
 
         if (!TaskAssignment)
         {
-            _logger.LogInformation($"No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}");
+            _logger.LogWarning("No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}",submissionCreateDto.TaskAssignmentId);
             throw new InvalidIdentifierException("Task Assignment with such Id does not exist");
         }
 
@@ -65,7 +65,7 @@ public class SubmissionService : ISubmissionService
 
         if(taskAssignment == null)
         {
-            _logger.LogInformation($"No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}");
+            _logger.LogWarning("No Task Assignment found with Id : {submissionCreateDto.TaskAssignmentId}",submissionCreateDto.TaskAssignmentId);
             throw new InvalidIdentifierException("Task Assignment with such Id does not exist");
         }
 
@@ -108,14 +108,13 @@ public class SubmissionService : ISubmissionService
 
             if( submission == null)
             {
-               _logger.LogInformation($"No Submission found with Id : {Id}");
-            throw new NotFoundException("No Submission found for this Id"); 
+               _logger.LogWarning("No Submission found with Id : {Id}",Id);
+                throw new NotFoundException("No Submission found for this Id"); 
             }
 
             await _cache.SetAsync($"submission:{Id}",submission);
         }
         
-
         res.Success = true;
         res.Message = $"Submission Found with Id : {Id}";
         res.Data = submission;

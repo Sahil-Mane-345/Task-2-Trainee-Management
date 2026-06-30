@@ -1,14 +1,16 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using StackExchange.Redis;
 
 namespace TraineeApi.Services.Redis;
 
 public class RedisService : IRedisService
 {
-    private readonly IDistributedCache _cache;
+    // private readonly IDistributedCache _cache;
+    private readonly IConnectionMultiplexer _cache;
     private readonly ILogger<RedisService> _logger;
-    public RedisService(IDistributedCache cache, ILogger<RedisService> logger)
+    public RedisService(IConnectionMultiplexer cache, ILogger<RedisService> logger)
     {
         _cache = cache;
         _logger = logger;
@@ -17,46 +19,38 @@ public class RedisService : IRedisService
 
     public async Task<T?> GetAsync<T>(string key)
     {
-        try
-        {
-            var value = await _cache.GetStringAsync(key);
-            if( value == null)
+            if (_cache.IsConnected)
+            {
+                var value = await _cache.GetDatabase().StringGetAsync(key);
+            if( !value.HasValue)
             {
                 return default;
             }
-
-            return JsonSerializer.Deserialize<T>(value)!;
-        }
-        catch (System.Exception)
-        {
-            _logger.LogError("Redis is not working");
+                return JsonSerializer.Deserialize<T>(value!);
+            }
             return default;
-        }
+
     }
 
     public async Task RemoveAsync(string key)
     {
-        try
+        if (_cache.IsConnected)
         {
-            await _cache.RemoveAsync(key);
-        }catch (System.Exception)
-        {
-            _logger.LogError("Redis is not working");
+            await _cache.GetDatabase().KeyDeleteAsync(key); 
         }
+            // await _cache.RemoveAsync(key);
     }
 
     public async Task SetAsync<T>(string key, T value)
     {
-        try
+        if (_cache.IsConnected)
         {
-            string val =  JsonSerializer.Serialize(value);
-            await _cache.SetStringAsync(key, val, new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
-            });
-        }catch (System.Exception)
-        {
-            _logger.LogError("Redis is not working");
+            string val = JsonSerializer.Serialize(value);
+            await _cache.GetDatabase().StringSetAsync(
+                key,
+                val,
+                TimeSpan.FromMinutes(1)
+            );
         }
     }
 

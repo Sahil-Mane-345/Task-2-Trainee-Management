@@ -58,7 +58,7 @@ public class TraineeDbService : ITraineeService {
         {
             var t = await _context.Trainees.FindAsync(Id);
             if( t == null ){
-                _logger.LogError($"No Trainee found with Id : {Id}");
+                _logger.LogWarning("Trainee Not Found. TraineeId : {Id}", Id);
                 throw new NotFoundException($"Trainee Not found for this Id");
             }
 
@@ -89,7 +89,7 @@ public class TraineeDbService : ITraineeService {
             await _context.Trainees.AddAsync(t);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation($"Trainee created with Id : {t.Id}");
+            _logger.LogInformation("Trainee created with Id : {t.Id}", t.Id);
 
             res.Success = true;
             res.Message = "Trainee created successfully.";
@@ -102,7 +102,7 @@ public class TraineeDbService : ITraineeService {
 
         var t = await _context.Trainees.FindAsync(Id);
         if ( t == null ){
-            _logger.LogError($"No Trainee found with Id : {Id}");
+            _logger.LogWarning("Trainee Not Found. TraineeId : {Id}", Id);
             throw new NotFoundException($"Trainee Not found for this Id");
         }
 
@@ -114,7 +114,7 @@ public class TraineeDbService : ITraineeService {
         t.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
-        _logger.LogInformation($"Trainee data updated successfully for Id : {Id}");
+        _logger.LogInformation("Trainee data updated successfully for Id : {Id}", Id);
 
         await _cache.RemoveAsync($"trainee:{Id}");
 
@@ -129,14 +129,14 @@ public class TraineeDbService : ITraineeService {
         var t = await _context.Trainees.FindAsync(Id);
 
         if( t == null){
-            _logger.LogError($"No Trainee found with Id : {Id}");
+            _logger.LogWarning("Trainee Not Found. TraineeId : {Id}", Id);
             throw new NotFoundException($"Trainee Not found for this Id");
         }
         _context.Trainees.Remove(t);
         await _context.SaveChangesAsync();
 
         await _cache.RemoveAsync($"trainee:{Id}");
-        _logger.LogInformation($"Trainee deletd succesfully with Id : {Id}");
+        _logger.LogInformation("Trainee deletd succesfully. TraineeId : {Id}", Id);
         return true;
     }
 }

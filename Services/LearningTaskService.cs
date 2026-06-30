@@ -38,10 +38,9 @@ public class LearningTaskService : ILearningTaskService
         ApiResponse<LearningTask> res = new();
 
         LearningTask? learningTask = await _context.LearningTasks.FindAsync(Id);
-        Console.WriteLine("Wea ewsdsd 39"+ learningTask?.Id);
         if(learningTask == null)
         {
-            _logger.LogError($"No Larning Task found with Id : {Id}");
+            _logger.LogWarning("Learning Task Not Found. LearningTaskId : {Id}", Id);
             throw new NotFoundException($"Learning Task Not found for this Id");
         }
         res.Success = true;
@@ -66,7 +65,7 @@ public class LearningTaskService : ILearningTaskService
         await _context.LearningTasks.AddAsync(LearningTask);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation($"LearningTask created with Id : {LearningTask.Id}");
+        _logger.LogInformation("LearningTask created with Id : {LearningTask.Id}",LearningTask.Id);
 
         res.Success = true;
         res.Message = "LearningTask created successfully.";
@@ -81,7 +80,7 @@ public class LearningTaskService : ILearningTaskService
         LearningTask? learningTask = await _context.LearningTasks.FindAsync(Id);
         if( learningTask == null)
         {
-            _logger.LogError($"No Larning Task found with Id : {Id}");
+            _logger.LogWarning("Learning Task Not Found. LearningTaskId : {Id}", Id);
             throw new NotFoundException($"Learning Task Not found for this Id");
         }
 
@@ -95,7 +94,7 @@ public class LearningTaskService : ILearningTaskService
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation($"LearningTask data updated successfully for Id : {Id}");
+        _logger.LogInformation("LearningTask data updated successfully for Id : {Id}",Id);
         res.Success = true;
         res.Message = "LearningTask Updated Successfully.";
         res.Data = learningTask;
@@ -109,12 +108,12 @@ public class LearningTaskService : ILearningTaskService
 
         if( LearningTask == null)
         {
-            _logger.LogError($"No LearningTask found with Id : {Id}");
+            _logger.LogWarning("Learning Task Not Found. LearningTaskId : {Id}", Id);
             throw new NotFoundException("No Learning Task found for this Id");
         }
         _context.LearningTasks.Remove(LearningTask);
         await _context.SaveChangesAsync();
-        _logger.LogInformation($"LearningTask deleted succesfully with Id : {Id}");
+        _logger.LogInformation("LearningTask deleted succesfully with Id : {Id}",Id);
         return true;
     }
 }
