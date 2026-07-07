@@ -1,12 +1,19 @@
-
+using Serilog;
 using TraineeApi.Utility;
 
 using TraineeApi.Extensions;
 
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json")
+        .Build())
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseSerilog();
 
 builder.Services.AddCorsConfiguration();
 
