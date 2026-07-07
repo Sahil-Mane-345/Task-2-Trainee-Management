@@ -26,7 +26,7 @@ public class RedisService : IRedisService
             {
                 return default;
             }
-                return JsonSerializer.Deserialize<T>(value!);
+                return JsonSerializer.Deserialize<T>(value.ToString());
             }
             return default;
 
