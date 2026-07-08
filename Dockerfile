@@ -1,4 +1,4 @@
-FROM docker-registry-002.zeuslearning.com/zeuslearning/dotnet/aspnet:9.0
+FROM 
 
 WORKDIR /app
 
