@@ -10,6 +10,8 @@ Dockerfile
 NuGet.Config
 token.txt
 
+appsettings.json
+
 
 # User-specific files
 *.rsuser

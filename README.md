@@ -1310,7 +1310,7 @@ TraineeApi
 ---
 # Architecture Diagram
 
-![Architecture Digram](images/sahil.drawio.png)
+[![sahil-drawio.png](https://i.postimg.cc/QMzX4HY2/sahil-drawio.png)](https://postimg.cc/JybVt4Lx)
 ---
 
 # Logging
