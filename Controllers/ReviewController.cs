@@ -11,7 +11,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize]
+[Authorize]
 public class ReviewController : ControllerBase
 {
     private readonly IReviewService _reviewService;

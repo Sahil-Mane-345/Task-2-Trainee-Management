@@ -7,7 +7,7 @@ namespace TraineeApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-// [Authorize]
+[Authorize]
 public class ProcessingJobsController: ControllerBase
 {
     private readonly IProcessingJobService _processingJobService;
