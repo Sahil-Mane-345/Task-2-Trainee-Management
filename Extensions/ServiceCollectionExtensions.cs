@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
 
-        string connectionStringMySQL = configuration.GetConnectionString("DefaultConnection")!;
+        string connectionStringMySQL = Environment.GetEnvironmentVariable("DB_CONNECTION") ?? configuration.GetConnectionString("DefaultConnection")!;
         ServerVersion serverVersion = ServerVersion.AutoDetect(connectionStringMySQL);
 
         services.AddDbContext<AppDbContext>( opt =>
@@ -58,7 +58,7 @@ public static class ServiceCollectionExtensions
             var logger = sp.GetRequiredService<ILogger<Program>>();
             var redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
             {
-                EndPoints = { configuration.GetConnectionString("RedisConnection")! },
+                EndPoints = { Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? configuration.GetConnectionString("RedisConnection")! },
                 AbortOnConnectFail = false,
                 ConnectRetry = 3,
                 ReconnectRetryPolicy = new ExponentialRetry(5000),
@@ -88,11 +88,11 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton( sp => new ConnectionFactory()
         {
-            HostName = rabbitMQSection["HostName"]!,
-            Port = Convert.ToInt32(rabbitMQSection["Port"]),
-            UserName = rabbitMQSection["UserName"]!,
-            Password = rabbitMQSection["Password"]!,
-            VirtualHost = rabbitMQSection["VirtualHost"]!,
+            HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? rabbitMQSection["HostName"]!,
+            Port = Convert.ToInt32( Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? rabbitMQSection["Port"]),
+            UserName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? rabbitMQSection["UserName"]!,
+            Password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? rabbitMQSection["Password"]!,
+            VirtualHost = Environment.GetEnvironmentVariable("RABBITMQ_VIRTUALHOST") ?? rabbitMQSection["VirtualHost"]!,
 
             AutomaticRecoveryEnabled = true,
             NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
@@ -120,14 +120,14 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services)
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddCors( options =>
         {
             options.AddDefaultPolicy(
                 policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
+                    policy.WithOrigins(Environment.GetEnvironmentVariable("TRAINEE_FRONTEND") ?? configuration["Cors-Url:Trainee-Frontend"]!).AllowAnyMethod().AllowAnyHeader();
                 }
             );
         });
@@ -139,10 +139,10 @@ public static class ServiceCollectionExtensions
     {
 
         services.AddHealthChecks().AddMySql(
-            configuration.GetConnectionString("DefaultConnection")!,
+            Environment.GetEnvironmentVariable("DB_CONNECTION") ??  configuration.GetConnectionString("DefaultConnection")!,
             name: "MySQL"
         ).AddRedis(
-            configuration.GetConnectionString("RedisConnection")!,
+            Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? configuration.GetConnectionString("RedisConnection")!,
             name: "Redis"
         ).AddRabbitMQ(
             async sp => await sp.GetRequiredService<ConnectionFactory>().CreateConnectionAsync(),
