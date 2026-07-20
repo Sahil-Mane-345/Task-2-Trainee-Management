@@ -19,9 +19,9 @@ public static class WebApplicationExtensions
         {
             context.Users.Add( new User
             {
-                UserName = "admin",
-                Email = "admin@trainee.com",
-                PasswordHash = PasswordHashing.HashPassword("Admin@123456"),
+                UserName = Environment.GetEnvironmentVariable("ADMIN_USERNAME")!,
+                Email = Environment.GetEnvironmentVariable("ADMIN_EMAIL")!,
+                PasswordHash = PasswordHashing.HashPassword(Environment.GetEnvironmentVariable("ADMIN_PASSWORD")!),
                 Role = "Admin"
             });
 

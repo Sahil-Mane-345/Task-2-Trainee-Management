@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   redis-smp:
-    image: 
+    image: ${REDIS_IMAGE}
     container_name: redis-smp
     ports:
       - "6379:6379"
@@ -12,15 +12,15 @@ services:
     restart: unless-stopped
 
   rabbitmq-smp:
-    image: 
+    image: ${RABBITMQ_IMAGE}
     container_name: rabbitmq-smp
     restart: unless-stopped
     ports:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: 
-      RABBITMQ_DEFAULT_PASS: 
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     volumes:
       - rabbitmq-lib-smp:/var/lib/rabbitmq/
       - rabbitmq-log-smp:/var/log/rabbitmq

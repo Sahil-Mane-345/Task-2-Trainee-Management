@@ -2,7 +2,9 @@ using Serilog;
 using TraineeApi.Utility;
 
 using TraineeApi.Extensions;
+using dotenv.net;
 
+DotEnv.Load();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(new ConfigurationBuilder()
@@ -54,11 +56,14 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
     app.MapOpenApi();
     app.UseSwaggerUi(options =>
     {
         options.DocumentPath = "/openapi/v1.json";
     });
+}
 
 
 app.UseHttpsRedirection();

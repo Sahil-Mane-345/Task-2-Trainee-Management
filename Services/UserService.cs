@@ -21,7 +21,7 @@ public class UserService : IUserService
     {
         _context = context;
         _configuration = configuration;
-        _expiresIn = Convert.ToInt32(_configuration["JWT:ExpiresIn"]);
+        _expiresIn = Convert.ToInt32(Environment.GetEnvironmentVariable("JWT_EXPIRY_SECONDS") ?? _configuration["JWT:ExpiresIn"]);
         _logger = logger;
     }
 
