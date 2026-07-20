@@ -17,11 +17,14 @@ public class LocalFileStorageService : IFileStorageService
 
     private readonly IProcessingJobService _processingJobService;
 
+    private readonly string _submissionFilePath;
+
     public LocalFileStorageService( IConfiguration configuration, AppDbContext context , IProcessingJobService processingJobService)
     {
         _configuration = configuration;
         _context = context;
         _processingJobService = processingJobService;
+        _submissionFilePath = Environment.GetEnvironmentVariable("SUBMISSION_FILEPAH") ?? _configuration["FilePaths:SubmissionFilePath"]!;
     }
 
     public async Task<ApiResponse<object>> SaveAsync(Guid submissionId, Guid UserId,IFormFileCollection FormFiles)
@@ -43,7 +46,7 @@ public class LocalFileStorageService : IFileStorageService
         {
             Guid fileId = Guid.NewGuid();
             string fileName = $"{fileId.ToString()}{Path.GetExtension(file.FileName)}";
-            string FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, fileName);
+            string FilePath = Path.Combine( _submissionFilePath, fileName);
 
             string checksum = "";
 
@@ -86,7 +89,7 @@ public class LocalFileStorageService : IFileStorageService
             return false;
         } 
 
-        string  FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, submissionFile.GeneratedFileName);
+        string  FilePath = Path.Combine(_submissionFilePath, submissionFile.GeneratedFileName);
         if(File.Exists(FilePath))
         {
             return true;
@@ -107,7 +110,7 @@ public class LocalFileStorageService : IFileStorageService
             throw new NotFoundException("Metadata not found for this Id");
         }
 
-        string FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, submissionFile.GeneratedFileName);
+        string FilePath = Path.Combine(_submissionFilePath, submissionFile.GeneratedFileName);
         if( !File.Exists(FilePath) )
         {
             throw new NotFoundException("File not found in storage");
@@ -135,7 +138,7 @@ public class LocalFileStorageService : IFileStorageService
             throw new NotFoundException("Metadata not found for this Id");
         }
         
-        string FilePath = Path.Combine(_configuration["FilePaths:SubmissionFilePath"]!, submissionFile.GeneratedFileName);
+        string FilePath = Path.Combine( _submissionFilePath, submissionFile.GeneratedFileName);
         File.Delete(FilePath);
 
         _context.Remove(submissionFile);
